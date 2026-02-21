@@ -500,3 +500,177 @@ header h1 {
     color: var(--text-dim);
     border: 1px solid var(--glass-border);
 }
+
+/* User Story Selector */
+.story-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.story-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-dim);
+    padding: 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.story-btn:hover {
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.story-btn.active {
+    background: var(--primary-glow);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+/* Insight Banner */
+.insight-banner {
+    background: linear-gradient(90deg, var(--primary-glow), transparent);
+    border-left: 4px solid var(--primary);
+    padding: 1.2rem;
+    margin-bottom: 2rem;
+    border-radius: 0 8px 8px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.insight-banner h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin-bottom: 0.4rem;
+}
+
+.insight-banner p {
+    font-size: 0.95rem;
+    color: #fff;
+    margin: 0;
+}
+
+/* Objective Overlay */
+.objective-overlay {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--primary);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.objective-overlay h2 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.objective-overlay p {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.objective-overlay button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Simulation Agents */
+.agent-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.agent-dot.red {
+    background: var(--red);
+    box-shadow: 0 0 5px var(--red);
+}
+
+.agent-dot.amber {
+    background: var(--amber);
+}
+
+/* Directive Enhancements */
+.directive-card {
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.directive-card:hover {
+    transform: scale(1.02);
+    border-color: var(--primary);
+}
+
+.execute-status {
+    color: var(--green);
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-left: auto;
+}
+
+/* Graphs */
+.outcome-label {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.outcome-delta {
+    font-size: 0.85rem;
+    color: var(--green);
+    margin-top: 0.2rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-dim);
+}
