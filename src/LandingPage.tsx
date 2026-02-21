@@ -60,19 +60,15 @@ function LandingPage() {
                     </div>
 
                     <div className="hero-visual">
-                        <div className="mockup-window">
+                        <div className="mockup-window high-fidelity">
                             <div className="mockup-header">
                                 <span className="dot red" />
                                 <span className="dot amber" />
                                 <span className="dot green" />
+                                <span className="mockup-title">Crowd-Twin Real-time Monitor</span>
                             </div>
                             <div className="mockup-body">
-                                <div className="heat-map-sim">
-                                    <div className="pulse-zone" />
-                                    <div className="prediction-overlay">
-                                        15m Forecast: 7.4 p/m&#178;
-                                    </div>
-                                </div>
+                                <img src="/assets/dashboard_v2.png" alt="CrowdTwin High-Fidelity Dashboard" className="hero-mockup-img" />
                             </div>
                         </div>
                     </div>
@@ -155,6 +151,28 @@ function LandingPage() {
                             <div className="step-num">04</div>
                             <h4>Command</h4>
                             <p>Pushes actionable directives to security staff terminals before the situation escalates.</p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ---- COGNITIVE ENGINE ---- */}
+                <section id="tech-deep" className="tech-showcase">
+                    <div className="showcase-content">
+                        <div className="showcase-text">
+                            <span className="section-tag">Inside the Engine</span>
+                            <h2>The Cognitive ABM Framework</h2>
+                            <p>
+                                Unlike traditional architectural tracers, CrowdTwin models the <strong>individual psychological response</strong> of every person in the venue.
+                            </p>
+                            <ul className="engine-checklist">
+                                <li><strong>Vision Sensors:</strong> Virtual agents "see" density shifts.</li>
+                                <li><strong>Goal Hierarchy:</strong> Agents prioritize safety over path efficiency.</li>
+                                <li><strong>Stress Vectors:</strong> Modeling velocity drop-off under social pressure.</li>
+                            </ul>
+                        </div>
+                        <div className="showcase-visual">
+                            <img src="/assets/agent_simulation_diagram.png" alt="Agent Simulation Diagram" className="engine-diagram" />
+                            <div className="diagram-glow" />
                         </div>
                     </div>
                 </section>

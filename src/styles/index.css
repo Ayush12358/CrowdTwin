@@ -674,3 +674,69 @@ header h1 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-dim);
 }
+
+/* High-Fidelity Demo Refinements */
+.map-placeholder.high-fidelity {
+    background-color: #fff;
+    /* Match heatmap_v2.png background */
+    border: 4px solid var(--glass-border);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.map-placeholder.high-fidelity .agent-dot {
+    width: 6px;
+    height: 6px;
+    opacity: 0.8;
+}
+
+.analysis-card.high-fidelity {
+    background: #0a0c10;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+}
+
+.mockup-header-lite {
+    background: #111;
+    padding: 0.5rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.analysis-visual {
+    position: relative;
+    height: 400px;
+}
+
+.bottleneck-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+}
+
+.analysis-overlay {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 4px solid var(--red);
+    max-width: 400px;
+}
+
+.analysis-overlay h3 {
+    margin: 0.5rem 0;
+    color: #fff;
+}
+
+.analysis-overlay p {
+    color: var(--text-dim);
+    margin: 0.2rem 0;
+}

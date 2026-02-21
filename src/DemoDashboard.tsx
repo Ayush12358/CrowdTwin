@@ -64,17 +64,17 @@ function DemoDashboard() {
             case 'heatmap':
                 return (
                     <div className="screen-heatmap">
-                        <div className="map-placeholder">
+                        <div className="map-placeholder high-fidelity" style={{ backgroundImage: `url('/assets/heatmap_v2.png')`, backgroundSize: 'cover' }}>
                             {liveData.zones.map(zone => (
                                 <div key={zone.id} className="zone-visual" style={{ position: 'absolute', inset: 0 }}>
                                     {renderAgents(zone.id, zone.count)}
                                 </div>
                             ))}
-                            <div className="zone-indicator" style={{ top: '30%', left: '40%', background: 'var(--amber)' }}>
+                            <div className="zone-indicator" style={{ top: '35%', left: '45%', background: 'var(--amber)' }}>
                                 <span>Sector B: 6.8 p/m² (Surge Imminent)</span>
                             </div>
-                            <div className="zone-indicator" style={{ top: '60%', left: '20%', background: 'var(--green)' }}>
-                                <span>Main Gate: 4.2 p/m²</span>
+                            <div className="zone-indicator" style={{ top: '15%', left: '70%', background: 'var(--green)' }}>
+                                <span>Gate A: 4.2 p/m²</span>
                             </div>
                         </div>
                         <div className="stats-grid">
@@ -197,11 +197,17 @@ function DemoDashboard() {
             case 'bottleneck':
                 return (
                     <div className="screen-bottleneck">
-                        <div className="analysis-card">
-                            <div className="alert-header" style={{ color: 'var(--red)' }}>STRUCTURAL BOTTLENECK DETECTED</div>
-                            <h3>Exit 4 Stairwell</h3>
-                            <p>Physical Capacity: 200 p/m</p>
-                            <p>Peak Simulated Demand: 350 p/m</p>
+                        <div className="analysis-card high-fidelity">
+                            <div className="mockup-header-lite">3D STRUCTURAL ANALYSIS</div>
+                            <div className="analysis-visual">
+                                <img src="/assets/security_dashboard_mockup.png" alt="3D Bottleneck Mockup" className="bottleneck-img" />
+                                <div className="analysis-overlay">
+                                    <div className="alert-header" style={{ color: 'var(--red)' }}>STRUCTURAL BOTTLENECK DETECTED</div>
+                                    <h3>Exit 4 Stairwell</h3>
+                                    <p>Physical Capacity: 200 p/m</p>
+                                    <p>Peak Simulated Demand: 350 p/m</p>
+                                </div>
+                            </div>
                             <div className="insight-banner" style={{ marginTop: '2rem' }}>
                                 <h4>Simulation Insight</h4>
                                 <p>Agents exhibit "Stairwell Hesitation" behavior, reducing effective width by 20%.</p>
