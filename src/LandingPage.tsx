@@ -60,15 +60,22 @@ function LandingPage() {
                     </div>
 
                     <div className="hero-visual">
-                        <div className="mockup-window high-fidelity">
-                            <div className="mockup-header">
-                                <span className="dot red" />
-                                <span className="dot amber" />
-                                <span className="dot green" />
-                                <span className="mockup-title">Crowd-Twin Real-time Monitor</span>
+                        <div className="mockup-window pro-saas">
+                            <div className="header-strip">
+                                <div className="dots"><span /><span /><span /></div>
+                                <div className="address">app.crowdtwin.com/monitor</div>
                             </div>
-                            <div className="mockup-body">
-                                <img src="/assets/dashboard_v2.png" alt="CrowdTwin High-Fidelity Dashboard" className="hero-mockup-img" />
+                            <div className="mockup-body-saas">
+                                <div className="saas-header-mock">
+                                    <div className="m-bar" />
+                                    <div className="m-search" />
+                                </div>
+                                <div className="saas-stats-mock">
+                                    <div className="m-card" /><div className="m-card" /><div className="m-card" />
+                                </div>
+                                <div className="saas-chart-mock">
+                                    <div className="m-line" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -171,7 +178,14 @@ function LandingPage() {
                             </ul>
                         </div>
                         <div className="showcase-visual">
-                            <img src="/assets/agent_simulation_diagram.png" alt="Agent Simulation Diagram" className="engine-diagram" />
+                            <div className="engine-viz-box">
+                                <div className="viz-layer l1"><span>Virtual Brain</span></div>
+                                <div className="viz-layer l2"><span>Goal Hierarchy</span></div>
+                                <div className="viz-layer l3"><span>Stress Response</span></div>
+                                <div className="viz-particles">
+                                    {[...Array(20)].map((_, i) => <div key={i} className="particle" />)}
+                                </div>
+                            </div>
                             <div className="diagram-glow" />
                         </div>
                     </div>
