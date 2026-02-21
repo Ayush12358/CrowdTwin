@@ -9,7 +9,7 @@
 
 ### 10 Functional Screens
 1. **Live Heatmap** (Real-time monitoring)
-2. **Predictive Mode** (Lead-time forest)
+2. **Predictive Mode** (Lead-time forecast)
 3. **Threshold Alert** (Predicted 7 p/m² warning)
 4. **Simulation Playback** (Prediction verification)
 5. **Command Panel** (Directive entry)

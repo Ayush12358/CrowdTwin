@@ -72,7 +72,40 @@ We don't replace your cameras; we make them proactive. Our system uses a Psychol
 
 In India, event organizers are legally required to hire **PSARA-certified security firms**. We are seeking to pilot our predictive engine with these specialized teams.
 
-*   **Goal:** Validate the alpha version in live operational environments.
+*   **Founder Team:** Ayush Maurya, Jayanth Raju Saraswathi, Prabhav.
 *   **Demo Website:** [Crowd-Twin](https://crowd-twin.vercel.app/)
 
-![bg right:40% fit](agent_simulation_diagram.png)
+---
+
+# UI/UX Annexure: 10 Operational Screens
+
+Our platform identifies three core use cases via a 10-screen functional suite:
+
+1.  **Surveillance:** Live Heatmap, Predictive Mode, Simulated Playback.
+2.  **Tactical Control:** Threshold Alerts, Command Panel, Staff Terminal, Outcome Forecast.
+3.  **Risk Design:** Layout Stress-Test, Bottleneck Analysis, Safety Analytics.
+
+---
+
+# User Story 1: Critical Event Prevention
+**Goal:** Intercept a 7.4 p/m² surge in Sector B before it becomes a physical lock.
+
+*   **Flow:** Operators monitor the **Live Heatmap** ➔ **Predictive Mode** flags a surge ➔ **Threshold Alert** triggers ➔ Operator opens **Command Panel** ➔ **Execute Directive** ➔ Staff receives notice on **Staff Terminal**.
+*   **Outcome:** Critical density avoided; lead-time verified via **Outcome Forecast**.
+
+---
+
+# User Story 2: Structural Risk Identification
+**Goal:** Identify architectural failures under maximum capacity stress.
+
+*   **Flow:** Designer uses **Stress-Test** to simulate 50k agents ➔ **Bottleneck Analysis** highlights "Exit 4 Stairwell" as a physical 200p/m limit.
+*   **Insight:** Simulation identifies "Stairwell Hesitation" behavior that static models miss.
+
+---
+
+# User Story 3: Post-Match Governance
+**Goal:** Audit the safety performance for regulatory compliance.
+
+*   **Flow:** Safety Officer views **Safety Analytics** ➔ Verifies "Surges Prevented" KPI ➔ Checks **Sim Playback** for accuracy ➔ Exports the **Incident Audit Report**.
+*   **Metric:** 92% successful prevention rate across 10 critical events.
+
