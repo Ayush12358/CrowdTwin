@@ -1,0 +1,62 @@
+/* Leaflet Customizations for CrowdTwin */
+@import 'leaflet/dist/leaflet.css';
+
+.leaflet-container {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-surface);
+    /* Matches our dark/light themes */
+    font-family: inherit;
+}
+
+/* Hide attribution for a cleaner SaaS look */
+.leaflet-control-attribution {
+    display: none !important;
+}
+
+/* Custom DivIcons for Agents */
+.agent-marker {
+    background: transparent;
+    border: none;
+}
+
+.agent-dot-leaflet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.agent-dot-leaflet.red {
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+}
+
+.agent-dot-leaflet.amber {
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+}
+
+/* Map specific popups to match our theme */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.leaflet-popup-content {
+    margin: 1rem;
+    font-weight: 600;
+}
+
+/* Dark mode tile filter (Optional, makes standard OSM look dark) */
+[data-theme="dark"] .leaflet-layer,
+[data-theme="dark"] .leaflet-control-zoom-in,
+[data-theme="dark"] .leaflet-control-zoom-out,
+[data-theme="dark"] .leaflet-control-attribution {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}

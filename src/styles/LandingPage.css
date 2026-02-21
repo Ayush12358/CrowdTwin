@@ -377,6 +377,66 @@
     background: var(--glass-border);
 }
 
+/* How It Works */
+.how-it-works {
+    padding: 6rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.steps-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    position: relative;
+    margin-top: 2rem;
+}
+
+.step-card {
+    flex: 1;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 2.5rem 1.5rem;
+    border-radius: 24px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    transition: transform 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.step-num {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.step-card h4 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.step-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.step-connector {
+    flex: 0 0 2rem;
+    height: 2px;
+    background: var(--border-color);
+    margin-top: 5rem;
+}
+
 /* Tech Showcase */
 .tech-showcase {
     padding: 8rem 4rem;
@@ -524,6 +584,22 @@
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.founder-avatar-wrap {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--founder-color, var(--primary));
+    background: var(--bg-surface);
+}
+
+.founder-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .founder-name {
     font-size: 1.5rem;
     font-weight: 700;
@@ -603,6 +679,16 @@
 
     .feature-grid {
         grid-template-columns: 1fr;
+    }
+
+    .steps-grid {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .step-connector {
+        display: none;
     }
 
     .founders-grid {

@@ -1,6 +1,17 @@
 import { useState, useEffect, useMemo } from 'react'
 import { API_STUBS, Zone, ForecastEvent, Recommendation, USER_STORIES, Story } from './api/mockData'
 import { useTheme } from './ThemeContext'
+import { MapContainer, TileLayer, Circle, Marker, Polyline, CircleMarker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import './styles/MapStyles.css'
+
+// Fix for default Leaflet icon not showing correctly in some setups
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 function DemoDashboard() {
     const [activeScreen, setActiveScreen] = useState('overview')
@@ -9,6 +20,7 @@ function DemoDashboard() {
     const [liveData, setLiveData] = useState(API_STUBS.getLiveDensity())
     const [forecast, setForecast] = useState(API_STUBS.getForecast())
     const [executedRecs, setExecutedRecs] = useState<string[]>([])
+    const [selectedMapZone, setSelectedMapZone] = useState<string | null>(null)
 
     // Theme and Accent State from Global Context
     const { theme, setTheme, accent, setAccent } = useTheme()
@@ -44,23 +56,8 @@ function DemoDashboard() {
     }
 
     const renderAgents = (zoneId: string, count: number) => {
-        const agents = []
-        const isRed = zoneId === 'sector_b' && activeStoryId === 'safety_first'
-        for (let i = 0; i < count / 10; i++) {
-            const style = {
-                top: `${Math.random() * 80 + 10}%`,
-                left: `${Math.random() * 80 + 10}%`,
-                animationDelay: `${Math.random() * 2}s`
-            }
-            agents.push(
-                <div
-                    key={i}
-                    className={`agent-dot ${isRed ? 'red' : 'amber'}`}
-                    style={style}
-                />
-            )
-        }
-        return agents
+        // Obsolete as we moved SVG drawing logic to the heatmap element for direct coordinates mapping
+        return null;
     }
 
     const renderScreen = () => {
@@ -141,9 +138,9 @@ function DemoDashboard() {
                                         <tr><th>Name</th><th>Status</th></tr>
                                     </thead>
                                     <tbody>
-                                        <tr><td>Gate A (North)</td><td><span className="gate-pill open">OPEN</span></td></tr>
-                                        <tr><td>Gate B (South)</td><td><span className="gate-pill closed">CLOSED</span></td></tr>
-                                        <tr><td>Gate C (VIP)</td><td><span className="gate-pill open">OPEN</span></td></tr>
+                                        <tr><td>Vindhya Main Path</td><td><span className="gate-pill open">OPEN</span></td></tr>
+                                        <tr><td>Himalaya Side Exit</td><td><span className="gate-pill closed">CLOSED</span></td></tr>
+                                        <tr><td>Main Stage VIP</td><td><span className="gate-pill open">OPEN</span></td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -152,37 +149,67 @@ function DemoDashboard() {
                 )
             case 'heatmap':
                 return (
-                    <div className="screen-heatmap pro-map">
+                    <div className="screen-heatmap pro-map" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', overflow: 'hidden' }}>
                         <div className="map-controls-top">
                             <div className="search-bar" style={{ background: 'var(--card-bg)' }}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                <input type="text" placeholder="Search Location..." style={{ background: 'transparent', color: 'var(--text-main)', border: 'none', outline: 'none' }} />
+                                <input type="text" placeholder="Search Location (e.g. Felicity Ground)..." style={{ background: 'transparent', color: 'var(--text-main)', border: 'none', outline: 'none', width: '250px' }} />
                             </div>
                         </div>
-                        <div className="stadium-container">
-                            <svg className="stadium-svg" viewBox="0 0 400 400">
-                                {/* Stadium Tiers */}
-                                <circle cx="200" cy="200" r="180" fill="none" stroke="#e2e8f0" strokeWidth="2" />
-                                <circle cx="200" cy="200" r="140" fill="none" stroke="#e2e8f0" strokeWidth="40" />
-                                <circle cx="200" cy="200" r="90" fill="none" stroke="#e2e8f0" strokeWidth="30" />
-                                <circle cx="200" cy="200" r="40" fill="#f1f5f9" /> {/* Pitch */}
+                        <div className="map-container" style={{ flex: 1, backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px', position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '350px' }}>
+                            <MapContainer center={[17.4455, 78.3485]} zoom={17} style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }} attributionControl={false} zoomControl={false} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} touchZoom={false}>
+                                <TileLayer
+                                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                />
 
-                                {/* Heat zones */}
-                                <circle cx="300" cy="100" r="40" fill="rgba(239, 68, 68, 0.4)" /> {/* Red zone */}
-                                <circle cx="100" cy="300" r="50" fill="rgba(245, 158, 11, 0.3)" /> {/* Amber zone */}
+                                {/* Heat Zones */}
+                                <Circle center={[17.446, 78.348]} radius={35} pathOptions={{ color: 'var(--red)', fillColor: 'var(--red)', fillOpacity: 0.3 }} />
+                                <Circle center={[17.445, 78.349]} radius={45} pathOptions={{ color: 'var(--amber)', fillColor: 'var(--amber)', fillOpacity: 0.3 }} />
 
-                                {/* Agents */}
-                                {liveData.zones.map(zone => renderAgents(zone.id, zone.count))}
-                            </svg>
-                            <div className="map-legend">
-                                <span>Density: <span style={{ color: 'var(--red)' }}>●</span> High <span style={{ color: 'var(--amber)' }}>●</span> Medium <span style={{ color: 'var(--green)' }}>●</span> Low</span>
+                                {/* Interaction Catchers */}
+                                <Circle center={[17.446, 78.348]} radius={35} pathOptions={{ color: 'transparent', fillColor: 'transparent' }} eventHandlers={{ click: () => setSelectedMapZone(selectedMapZone === 'ground' ? null : 'ground') }} />
+                                <Circle center={[17.445, 78.349]} radius={45} pathOptions={{ color: 'transparent', fillColor: 'transparent' }} eventHandlers={{ click: () => setSelectedMapZone(selectedMapZone === 'himalaya' ? null : 'himalaya') }} />
+                                <Circle center={[17.444, 78.348]} radius={25} pathOptions={{ color: 'transparent', fillColor: 'transparent' }} eventHandlers={{ click: () => setSelectedMapZone(selectedMapZone === 'vindhya' ? null : 'vindhya') }} />
+
+                                {/* Agents Map */}
+                                {liveData.zones.map((zone, idx) => {
+                                    const count = zone.count;
+                                    const agents = [];
+                                    const isRed = zone.id === 'sector_b' && activeStoryId === 'safety_first';
+
+                                    // Base coordinates
+                                    let lat = 17.446, lng = 78.348, spreadLat = 0.0003, spreadLng = 0.0003;
+                                    if (idx === 1) { lat = 17.445; lng = 78.349; spreadLat = 0.0004; spreadLng = 0.0004; } // Food Court
+                                    if (idx === 2) { lat = 17.444; lng = 78.348; spreadLat = 0.0002; spreadLng = 0.0002; } // Vindhya Pathways
+
+                                    for (let i = 0; i < count / 10; i++) {
+                                        const rLat = lat + (Math.random() - 0.5) * spreadLat;
+                                        const rLng = lng + (Math.random() - 0.5) * spreadLng;
+
+                                        // Ensure dots pulsate randomly via styles inherited from CSS
+                                        const iconHtml = `<div class="agent-dot-leaflet ${isRed ? 'red' : (idx === 1 ? 'amber' : '')}" style="animation-delay: ${Math.random() * 2}s"></div>`;
+                                        const customIcon = L.divIcon({ html: iconHtml, className: 'agent-marker', iconSize: [8, 8], iconAnchor: [4, 4] });
+
+                                        agents.push(<Marker key={`agent-${zone.id}-${i}`} position={[rLat, rLng]} icon={customIcon} />);
+                                    }
+                                    return agents;
+                                })}
+                            </MapContainer>
+                            <div className="map-legend" style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'var(--bg-surface)', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.8rem', border: '1px solid var(--border-color)' }}>
+                                <span>Density: <span style={{ color: 'var(--red)' }}>●</span> High <span style={{ color: 'var(--amber)' }}>●</span> Medium <span style={{ color: 'var(--text-main)' }}>●</span> Low</span>
                             </div>
                         </div>
-                        <div className="stats-grid" style={{ marginTop: '2rem' }}>
+                        {selectedMapZone && (
+                            <div className="zone-detail-panel" style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--primary)', marginTop: '1rem', animation: 'fadeIn 0.3s' }}>
+                                <h3>{selectedMapZone === 'ground' ? 'Felicity Ground' : selectedMapZone === 'himalaya' ? 'Himalaya Block' : 'Vindhya Pathway'}</h3>
+                                <p style={{ color: 'var(--text-muted)' }}>Status: {selectedMapZone === 'ground' ? 'CRITICAL (6.8 p/m²)' : 'Normal (1.5 p/m²)'}</p>
+                            </div>
+                        )}
+                        <div className="stats-grid" style={{ marginTop: '0', flexShrink: 0 }}>
                             {liveData.zones.map(zone => (
-                                <div key={zone.id} className="pro-stat-card mini">
+                                <div key={zone.id} className="pro-stat-card mini" style={{ padding: '1rem' }}>
                                     <div className="stat-info">
-                                        <h4>{zone.name}</h4>
+                                        <h4>{zone.name === 'Sector B: Level 1' ? 'Main Stage' : zone.name === 'North Entrance' ? 'Food Court' : 'Pathways'}</h4>
                                         <div className="value" style={{ fontSize: '1.2rem' }}>{zone.density} <small>p/m²</small></div>
                                     </div>
                                 </div>
@@ -195,7 +222,7 @@ function DemoDashboard() {
                     <div className="screen-predictive" style={{ padding: '2rem' }}>
                         <div className="prediction-alert">
                             <div className="alert-header">DENSITY SURGE PREDICTED (15M LEAD TIME)</div>
-                            <p><strong>Sector B: Entrance 3</strong></p>
+                            <p><strong>Felicity Main Stage</strong></p>
                             <p>Current: 4.8 p/m² | Expected: 7.4 p/m²</p>
                             <div className="confidence-meter">
                                 <div className="meter-fill" style={{ width: '92%' }}></div>
@@ -221,15 +248,37 @@ function DemoDashboard() {
                             <div className="venue-viewport">
                                 <div className="viewport-header">VENUE MAP - PREDICTIVE VIEW</div>
                                 <div className="isometric-map">
-                                    {/* SVG Isometric representation inspired by reference */}
-                                    <svg viewBox="0 0 600 400" className="iso-svg">
-                                        <path d="M100 200 L300 100 L500 200 L300 300 Z" fill="none" stroke="var(--glass-border)" strokeWidth="2" />
-                                        <path d="M150 220 L300 145 L450 220 L300 295 Z" fill="none" stroke="var(--glass-border)" strokeWidth="1" />
-                                        {/* Surge Path */}
-                                        <path d="M300 295 L300 245 L200 195 L200 145" fill="none" stroke="var(--red)" strokeWidth="4" strokeLinecap="round" className="surge-path" />
-                                    </svg>
+                                    <MapContainer center={[17.4455, 78.3485]} zoom={17.5} style={{ width: '100%', height: '100%' }} attributionControl={false} dragging={false} scrollWheelZoom={false}>
+                                        <TileLayer
+                                            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                        />
+
+                                        {/* Path highlighting */}
+                                        <Polyline
+                                            positions={[
+                                                [17.446, 78.348], // Main Stage
+                                                [17.4455, 78.3485],
+                                                [17.445, 78.349], // Himalaya
+                                                [17.444, 78.348]  // Vindhya exit
+                                            ]}
+                                            pathOptions={{ color: 'var(--amber)', weight: 4, dashArray: '10, 10' }}
+                                        />
+
+                                        <Polyline
+                                            positions={[
+                                                [17.446, 78.348],
+                                                [17.4455, 78.3485]
+                                            ]}
+                                            pathOptions={{ color: 'var(--red)', weight: 6 }}
+                                            className="pulse-animate"
+                                        />
+
+                                        <CircleMarker center={[17.446, 78.348]} radius={15} pathOptions={{ color: 'var(--red)', fillColor: 'var(--red)', fillOpacity: 0.8 }}>
+                                            <Popup>Main Stage - Critical</Popup>
+                                        </CircleMarker>
+                                    </MapContainer>
                                     <div className="map-alert-tag">
-                                        <div className="tag-header">PREDICTIVE ALERT: CROWD SURGE</div>
+                                        <div className="tag-header">PREDICTIVE ALERT: MAIN STAGE SURGE</div>
                                         <div className="tag-time">TIME TO CRITICAL: 04:32</div>
                                     </div>
                                 </div>
@@ -273,12 +322,16 @@ function DemoDashboard() {
                 return (
                     <div className="screen-staff">
                         <div className="mobile-view">
-                            <div className="mobile-header">COMMAND TERMINAL - SECTOR B</div>
+                            <div className="mobile-header">COMMAND TERMINAL - SECTOR HIMALAYA</div>
                             <div className="mobile-content">
                                 {executedRecs.length > 0 ? (
                                     <div className="directive-notice">
                                         <h3>NEW DIRECTIVE</h3>
-                                        <p>Redirect flow from Sector B to North Exit immediately.</p>
+                                        <p><strong>Location:</strong> Post 4 - Food Court Entrance</p>
+                                        <p><strong>Current Flow:</strong> 45 p/min</p>
+                                        <div style={{ margin: '1rem 0', padding: '1rem', background: 'rgba(255,170,0,0.1)', border: '1px solid var(--amber)', borderRadius: '8px', color: 'var(--amber)', fontSize: '0.9rem' }}>
+                                            Deploy 3 personnel to widen barrier B. Expect surge from Main Stage in 4 mins.
+                                        </div>
                                         <button className="ack-btn" onClick={() => setActiveScreen('outcome')}>Acknowledge & Sync</button>
                                     </div>
                                 ) : (
@@ -316,10 +369,17 @@ function DemoDashboard() {
                         <div className="analysis-card high-fidelity">
                             <div className="mockup-header-lite">3D STRUCTURAL ANALYSIS</div>
                             <div className="analysis-visual">
-                                <img src="/assets/security_dashboard_mockup.png" alt="3D Bottleneck Mockup" className="bottleneck-img" />
+                                {/* Use code-driven visual to ensure people are implied by data dots, rather than empty photography */}
+                                <div className="video-placeholder" style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '4px', width: '80%', height: '80%' }}>
+                                        {[...Array(100)].map((_, i) => (
+                                            <div key={i} style={{ background: i < 80 ? 'var(--red)' : 'var(--text-muted)', borderRadius: '2px', opacity: i < 80 ? 0.8 : 0.3 }} />
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="analysis-overlay">
                                     <div className="alert-header" style={{ color: 'var(--red)' }}>STRUCTURAL BOTTLENECK DETECTED</div>
-                                    <h3>Exit 4 Stairwell</h3>
+                                    <h3>Himalaya Ramp</h3>
                                     <p>Physical Capacity: 200 p/m</p>
                                     <p>Peak Simulated Demand: 350 p/m</p>
                                 </div>

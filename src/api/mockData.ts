@@ -46,21 +46,21 @@ export interface Story {
 export const USER_STORIES: Story[] = [
     {
         id: 'safety_first',
-        title: 'User Story 1: Critical Prevention',
-        objective: 'Intercept a 7.4 p/m² surge in Sector B before it becomes a physical lock.',
-        insight: 'ABM logic predicts behavioral panic based on fluid dynamics + social psychology.'
+        title: 'User Story 1: Critical Surge Details',
+        objective: 'Intercept a 7.4 p/m² surge at the Felicity Ground Main Stage before it becomes a physical lock.',
+        insight: 'ABM logic predicts behavioral panic based on fluid dynamics + social psychology during high-energy concerts.'
     },
     {
         id: 'structural_fix',
-        title: 'User Story 2: Design Risk',
-        objective: 'Identify why Exit 4 always fails under high capacity stress.',
-        insight: 'Flow analysis shows stair-well width is a physical 200p/m bottleneck.'
+        title: 'User Story 2: Bottleneck Alerts',
+        objective: 'Identify why Himalaya Food Court entrances fail under high capacity stress during breaks.',
+        insight: 'Flow analysis shows the food stall walkway width is a physical 200p/m bottleneck.'
     },
     {
         id: 'audit_trail',
-        title: 'User Story 3: Post-Match Governance',
-        objective: 'Generate a safety audit report verifying a 92% successful prevention rate.',
-        insight: 'Safety score is calculated by Lead-Time vs Intervention Accuracy metrics.'
+        title: 'User Story 3: Staff Terminal Sync',
+        objective: 'Generate actionable, localized directives to security staff terminals in real-time.',
+        insight: 'Command Center pushes localized insights directly to ground teams for pre-emptive action.'
     }
 ];
 
@@ -69,9 +69,9 @@ export const API_STUBS = {
         return {
             timestamp: new Date().toISOString(),
             zones: [
-                { id: "gate_1", name: "Main Entrance", count: 120, density: 4.2 },
-                { id: "sector_b", name: "South Stand", count: 450, density: 6.8 },
-                { id: "exit_4", name: "North Exit", count: 80, density: 1.5 },
+                { id: "gate_1", name: "Himalaya Food Court", count: 120, density: 4.2 },
+                { id: "sector_b", name: "Felicity Ground (Stage)", count: 450, density: 6.8 },
+                { id: "exit_4", name: "Vindhya Pathways", count: 80, density: 1.5 },
             ],
             venueStatus: "Amber",
         };
@@ -97,17 +97,17 @@ export const API_STUBS = {
             recommendations: [
                 {
                     id: "rec_001",
-                    action: "REDIRECT",
+                    action: "REDIRECT FLOW",
                     source: "sector_b",
                     target: "exit_4",
-                    reason: "Imminent surge predicted in Sector B; capacity available near North Exit."
+                    reason: "Imminent surge predicted at Felicity Ground Stage; redirect via Vindhya Pathways."
                 },
                 {
                     id: "rec_002",
-                    action: "CLOSE_GATE",
+                    action: "DEPLOY BARRIERS",
                     source: "gate_1",
                     target: "all",
-                    reason: "Reducing ingress to prevent compounding stand-still at Sect B."
+                    reason: "Reducing ingress at Himalaya Food Court to prevent compounding stand-still."
                 }
             ]
         };
