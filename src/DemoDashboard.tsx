@@ -51,55 +51,47 @@ const DemoDashboard: React.FC = () => {
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.5">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                             </svg>
-                            <h3>Upload Venue Map</h3>
+                            <h3>Upload Venue Map (Base)</h3>
                             <p>Upload architectural layout for AI Node mapping</p>
-                            <div className="pro-btn primary">Select Files</div>
+                            <div className="pro-btn primary">Select Base Map</div>
                         </div>
                     </div>
                 )
-            case 1: // Node/Route Generation
+            case 1: // Base Map View
                 return (
                     <div className="phase-card">
                         <div className="map-view-container">
-                            <img src="/abstract-campus.svg" alt="Map" style={{ width: '100%', opacity: 0.3 }} />
-                            <div className="overlay-nodes">
-                                {/* Visual simulation of nodes being generated */}
-                                <div className="node pulse" style={{ top: '40%', left: '30%' }}></div>
-                                <div className="node pulse" style={{ top: '40%', left: '70%' }}></div>
-                                <div className="node pulse" style={{ top: '60%', left: '50%' }}></div>
-                                <svg className="connector-lines" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-                                    <line x1="30%" y1="40%" x2="50%" y2="60%" stroke="var(--primary)" strokeDasharray="5,5" />
-                                    <line x1="70%" y1="40%" x2="50%" y2="60%" stroke="var(--primary)" strokeDasharray="5,5" />
-                                </svg>
-                            </div>
-                            <div className="floating-insights glass">
-                                <h4>AI Node Mapping</h4>
-                                <ul>
-                                    <li>64 Critical Flow Nodes Found</li>
-                                    <li>3 Major Bottleneck Routes Identified</li>
-                                </ul>
-                                <button className="pro-btn primary small" onClick={nextStep}>Verify & Edit Routes</button>
+                            <img src="/assets/Base.jpeg" alt="Base Map" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <div className="floating-insights glass animate-in">
+                                <h4>Venue Map Ingested</h4>
+                                <p>Architectural layout parsed. Ready for Node generation.</p>
+                                <button className="pro-btn primary small" onClick={nextStep}>Generate Nodes & Edges</button>
                             </div>
                         </div>
                     </div>
                 )
-            case 2: // Distribution
+            case 2: // Init Nodes & Edges
                 return (
                     <div className="phase-card">
-                        <div className="split-view">
-                            <div className="map-side">
-                                <img src="/abstract-campus.svg" alt="Map" style={{ width: '100%', opacity: 0.5 }} />
-                                <div className="personnel-dot" style={{ top: '35%', left: '28%' }}>S1</div>
-                                <div className="personnel-dot" style={{ top: '35%', left: '72%' }}>S2</div>
+                        <div className="map-view-container">
+                            <img src="/assets/Init Nodes and Edges.png" alt="Init Nodes" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <div className="floating-insights glass animate-in" style={{ borderColor: 'var(--amber)' }}>
+                                <h4>Initial Node Mapping</h4>
+                                <p>Analyzing crowd flow vectors and junction nodes...</p>
+                                <button className="pro-btn primary small" onClick={nextStep}>Finalize Netowrk</button>
                             </div>
-                            <div className="control-side">
-                                <h3>Strategic Distribution</h3>
-                                <p>AI Recommendation: Personnel training required for Gate 4 and Sector B.</p>
-                                <div className="stat-card mini">
-                                    <small>Personnel Required</small>
-                                    <div className="value">148 Units</div>
-                                </div>
-                                <button className="pro-btn secondary" onClick={() => resetSubStep('monitor')}>Finalize & Go Live</button>
+                        </div>
+                    </div>
+                )
+            case 3: // Final Nodes & Edges
+                return (
+                    <div className="phase-card">
+                        <div className="map-view-container">
+                            <img src="/assets/Final Nodes and Edges.png" alt="Final Nodes" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <div className="floating-insights glass animate-in" style={{ borderColor: 'var(--green)' }}>
+                                <h4>Network Optimized</h4>
+                                <p>Final nodes and paths verified for personnel distribution.</p>
+                                <button className="pro-btn primary small" onClick={() => resetSubStep('monitor')}>Launch Monitoring</button>
                             </div>
                         </div>
                     </div>
@@ -113,8 +105,9 @@ const DemoDashboard: React.FC = () => {
         <div className="phase-card no-padding">
             <div className="live-monitor-grid">
                 <div className="video-viewport">
-                    <video src="/assets/Live%20Heatmap.mp4" autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <div className="telemetry-hud pulse-line">LIVE FEED: STADIUM_MAIN</div>
+                    <video src="/assets/Pre Heatmap.mp4" autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div className="telemetry-hud pulse-line">LIVE FEED: PSARA_STADIUM_NORTH</div>
+                    <div className="corner-tag pulse">PRE-INTERVENTION MONITORING</div>
                 </div>
                 <div className="alerts-sidebar glass">
                     <h3>Hazard Monitoring</h3>
@@ -135,34 +128,50 @@ const DemoDashboard: React.FC = () => {
 
     // Phase 3: Prevention (Problem Finding)
     const renderPrevention = () => (
-        <div className="phase-card">
-            <div className="crisis-dashboard">
-                <div className="header-alert red">
-                    <h2>Mishap Prediction: Crowd Crush Risk</h2>
-                    <p>Location: North Gate Tunnel | Risk Score: 92%</p>
+        <div className="phase-card no-padding">
+            <div className="prevention-layout" style={{ display: 'flex', height: '100%' }}>
+                <div className="visual-side" style={{ flex: 1, position: 'relative', background: '#000' }}>
+                    <video
+                        src={mishapResolved ? "/assets/Post Heatmap.mp4" : "/assets/Pre Heatmap.mp4"}
+                        autoPlay loop muted
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
+                    />
+                    {!mishapResolved && (
+                        <div className="alert-overlay animate-pulse" style={{ position: 'absolute', top: '10%', left: '10%', right: '10%', zIndex: 10 }}>
+                            <img src="/assets/Mishap pred alert.png" alt="Alert" style={{ width: '100%', borderRadius: '12px', boxShadow: '0 0 40px rgba(239, 68, 68, 0.5)' }} />
+                        </div>
+                    )}
+                    {mishapResolved && (
+                        <div className="success-overlay animate-in" style={{ position: 'absolute', bottom: '2rem', left: '2rem', right: '2rem', background: 'rgba(16, 185, 129, 0.9)', padding: '1.5rem', borderRadius: '12px', color: '#fff', textAlign: 'center' }}>
+                            <h2 style={{ margin: 0 }}>✓ MISHAP AVERTED</h2>
+                            <p style={{ margin: '0.5rem 0' }}>Post-intervention flow stabilized. Returning to normal monitoring.</p>
+                            <button className="pro-btn secondary small" style={{ color: '#000' }} onClick={() => resetSubStep('monitor')}>Resume Active Monitoring</button>
+                        </div>
+                    )}
                 </div>
-                <div className="suggestions-grid">
-                    <div className={`suggestion-card ${selectedAction === 'open' ? 'active' : ''}`} onClick={() => setSelectedAction('open')}>
-                        <h4>Recommendation 1</h4>
-                        <p>Open Emergency Exit 4 to redistribute flow.</p>
-                    </div>
-                    <div className={`suggestion-card ${selectedAction === 'divert' ? 'active' : ''}`} onClick={() => setSelectedAction('divert')}>
-                        <h4>Recommendation 2</h4>
-                        <p>Divert incoming crowd to West Plaza.</p>
-                    </div>
-                </div>
-                {selectedAction && !mishapResolved && (
-                    <div className="command-directive glass animate-in">
-                        <h3>COMMAND CENTRE DIRECTIVE</h3>
-                        <p className="code-font">DIRECT_TO_GROUND: "Team Alpha, open gate 4 immediately and guide crowd to sector C."</p>
-                        <button className="pro-btn primary" onClick={() => setMishapResolved(true)}>Execute Action</button>
-                    </div>
-                )}
-                {mishapResolved && (
-                    <div className="result-alert success animate-in">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        <span>MISHAP AVERTED: Normal flow resumed at North Gate.</span>
-                        <button className="pro-btn secondary small" style={{ marginLeft: '1rem' }} onClick={() => { setMishapResolved(false); setSelectedAction(null); resetSubStep('monitor'); }}>Resume Monitoring</button>
+                {!mishapResolved && (
+                    <div className="control-side glass" style={{ width: '400px', padding: '2rem', borderLeft: '1px solid var(--border-color)' }}>
+                        <div className="header-alert red" style={{ marginBottom: '2rem' }}>
+                            <h2>Mishap Prediction</h2>
+                            <p>North Gate Tunnel | Risk: 92%</p>
+                        </div>
+                        <div className="suggestions-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div className={`suggestion-card ${selectedAction === 'open' ? 'active' : ''}`} onClick={() => setSelectedAction('open')}>
+                                <h4>Open Emergency Exit 4</h4>
+                                <p>Release bottleneck flow to bypass sector B.</p>
+                            </div>
+                            <div className={`suggestion-card ${selectedAction === 'divert' ? 'active' : ''}`} onClick={() => setSelectedAction('divert')}>
+                                <h4>Divert to West Plaza</h4>
+                                <p>Reroute inflow to larger standing area.</p>
+                            </div>
+                        </div>
+                        {selectedAction && (
+                            <div className="command-directive animate-in" style={{ marginTop: '2rem' }}>
+                                <h3>DIRECTIVE</h3>
+                                <p className="code-font">TO_ALPHA: "Open Gate 4 now."</p>
+                                <button className="pro-btn primary" style={{ width: '100%' }} onClick={() => setMishapResolved(true)}>Execute</button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -171,18 +180,20 @@ const DemoDashboard: React.FC = () => {
 
     // Phase 4: Response (Solution Finding)
     const renderResponse = () => {
-
         switch (subStep) {
             case 0: // Detection
                 return (
-                    <div className="phase-card">
-                        <div className="incident-alert red animate-pulse">
-                            <div className="icon">⚠️</div>
-                            <div className="content">
-                                <h2>CRITICAL MISHAP DETECTED</h2>
-                                <p>Structural bottleneck failure at Stairwell 2. Active injuries reported.</p>
+                    <div className="phase-card no-padding">
+                        <div style={{ position: 'relative', height: '100%', background: '#000' }}>
+                            <video src="/assets/Pre Heatmap.mp4" autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
+                            <div className="central-alert animate-in" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: '600px' }}>
+                                <img src="/assets/Mishap pred alert.png" alt="Critical Alert" style={{ width: '100%', borderRadius: '20px', border: '2px solid var(--red)', boxShadow: '0 0 50px var(--red)' }} />
+                                <div className="overlay-desc glass" style={{ padding: '2rem', marginTop: '1rem', textAlign: 'center', borderRadius: '16px' }}>
+                                    <h2 style={{ color: 'var(--red)', margin: 0 }}>CRITICAL INCIDENT IDENTIFIED</h2>
+                                    <p>Automated solution simulation triggered in background.</p>
+                                    <button className="pro-btn primary" style={{ marginTop: '1rem' }} onClick={nextStep}>Analyze Solutions</button>
+                                </div>
                             </div>
-                            <button className="pro-btn primary" onClick={nextStep}>Search for Solutions</button>
                         </div>
                     </div>
                 )
@@ -191,12 +202,12 @@ const DemoDashboard: React.FC = () => {
                     <div className="phase-card center-content">
                         <div className="sim-loading">
                             <div className="spinner"></div>
-                            <h3>Running Rescue Simulations...</h3>
+                            <h3>AI Search in Progress...</h3>
                             <div className="progress-bar">
                                 <div className="fill" style={{ width: `${simProgress}%` }}></div>
                             </div>
-                            <p className="code-font">Simulating Scenario {simProgress < 50 ? 'A (Evacuation)' : 'B (Containment)'}</p>
-                            {simProgress >= 100 && <button className="pro-btn primary" onClick={nextStep}>View Actionable Steps</button>}
+                            <p className="code-font" style={{ color: 'var(--amber)' }}>Parallel Sim {simProgress * 1050} agent-steps...</p>
+                            {simProgress >= 100 && <button className="pro-btn primary" onClick={nextStep}>View Actionable Rescue Plan</button>}
                         </div>
                     </div>
                 )
@@ -204,27 +215,30 @@ const DemoDashboard: React.FC = () => {
                 return (
                     <div className="phase-card">
                         <div className="solution-panel">
-                            <h3>OPTIMIZED RESPONSE ACTION</h3>
+                            <h3>RESUE PROTOCOL OMEGA</h3>
                             <div className="action-step active">
-                                <div className="step-num">Step 1</div>
-                                <p>Halt all inflows to Sector B via Central Hub.</p>
+                                <div className="step-num">DEPLOY</div>
+                                <p>Team Bravo to Stairwell 2. Team Charlie to East Escapements.</p>
                             </div>
                             <div className="directive-box glass">
-                                <h4>Ground Force Instruction</h4>
-                                <p className="code-font">TO_ALL_UNITS: "Full lockdown of Level 2. Evacuate via East Ramps."</p>
+                                <h4>Ground Directive</h4>
+                                <p className="code-font">"All units, engage Sector Delta bypass. Evacuate Section 4."</p>
                             </div>
-                            <button className="pro-btn success" onClick={nextStep}>Mark as Handled</button>
+                            <button className="pro-btn success" onClick={nextStep}>Verify Resolution</button>
                         </div>
                     </div>
                 )
             case 3: // Handled
                 return (
-                    <div className="phase-card center-content">
-                        <div className="handled-confirm">
-                            <div className="big-check">✓</div>
-                            <h2>MISHAP HANDLED</h2>
-                            <p>Area secured. Safety protocol Gamma engaged.</p>
-                            <button className="pro-btn secondary" onClick={() => resetSubStep('monitor')}>Back to Active Monitoring</button>
+                    <div className="phase-card no-padding">
+                        <div style={{ position: 'relative', height: '100%', background: '#000' }}>
+                            <video src="/assets/Post Heatmap.mp4" autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div className="handled-overlay animate-in" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', padding: '3rem', border: '5px solid var(--green)', borderRadius: '30px', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }}>
+                                <div className="big-check" style={{ fontSize: '100px', lineHeight: 1 }}>✓</div>
+                                <h1 style={{ fontSize: '3rem', margin: '1rem 0' }}>MISHAP HANDLED</h1>
+                                <p style={{ fontSize: '1.2rem', opacity: 0.8 }}>Incident resolved via post-intervention dynamics.</p>
+                                <button className="pro-btn secondary" onClick={() => resetSubStep('monitor')}>Back to Watch Mode</button>
+                            </div>
                         </div>
                     </div>
                 )
