@@ -3,7 +3,7 @@ import { useTheme } from './ThemeContext'
 import './styles/index.css'
 
 type TabType = 'twin' | 'predictions'
-type TwinPhase = 'upload' | 'init_nodes' | 'final_nodes' | 'live'
+type TwinPhase = 'upload' | 'init_nodes' | 'verifying_nodes' | 'final_nodes' | 'live'
 type PredPhase = 'live' | 'problem_finding' | 'solution_finding' | 'resolved'
 
 interface RiskNode {
@@ -21,6 +21,18 @@ const DemoDashboard: React.FC = () => {
 
     // Tab 1: Crowd Twin State (Pre-Event -> Live)
     const [twinPhase, setTwinPhase] = useState<TwinPhase>('upload')
+    const [twinProgress, setTwinProgress] = useState(0)
+
+    useEffect(() => {
+        if (activeTab === 'twin' && twinPhase === 'verifying_nodes') {
+            if (twinProgress < 100) {
+                const timer = setTimeout(() => setTwinProgress(p => p + 5), 100)
+                return () => clearTimeout(timer)
+            } else {
+                setTwinPhase('final_nodes')
+            }
+        }
+    }, [activeTab, twinPhase, twinProgress])
 
     // Tab 2: Predictions State (Problem/Solution Finding)
     const [predPhase, setPredPhase] = useState<PredPhase>('live')
@@ -52,7 +64,20 @@ const DemoDashboard: React.FC = () => {
                     </div>
                 )
             case 'init_nodes':
-                return <img src="/assets/Init Nodes and Edges.png" alt="Init Nodes" className="full-asset fade-in" onClick={() => setTwinPhase('final_nodes')} style={{ cursor: 'pointer' }} />
+                return <img src="/assets/Init Nodes and Edges.png" alt="Init Nodes" className="full-asset fade-in" onClick={() => { setTwinPhase('verifying_nodes'); setTwinProgress(0); }} style={{ cursor: 'pointer' }} />
+            case 'verifying_nodes':
+                return (
+                    <div className="relative-container fade-in">
+                        <img src="/assets/Init Nodes and Edges.png" alt="Init Nodes" className="full-asset opacity-50" />
+                        <div className="sim-loader-area glass" style={{ position: 'absolute', flexDirection: 'column', padding: '2rem', borderRadius: '16px', border: '1px solid var(--primary)' }}>
+                            <div className="spinner-small" style={{ width: '40px', height: '40px', marginBottom: '1rem' }} />
+                            <h3 style={{ margin: '0 0 1rem 0', color: 'var(--primary)' }}>Verifying Flow Topology...</h3>
+                            <div className="progress-bar" style={{ width: '100%', minWidth: '250px', background: 'var(--border-color)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div className="fill" style={{ width: `${twinProgress}%`, background: 'var(--primary)', height: '100%', transition: 'width 0.1s' }}></div>
+                            </div>
+                        </div>
+                    </div>
+                )
             case 'final_nodes':
                 return <img src="/assets/Final Nodes and Edges.png" alt="Final Nodes" className="full-asset fade-in" onClick={() => setTwinPhase('live')} style={{ cursor: 'pointer' }} />
             case 'live':
@@ -62,14 +87,21 @@ const DemoDashboard: React.FC = () => {
 
     const renderTwinBottom = () => {
         if (twinPhase === 'upload') return <p className="muted-text">Awaiting map upload...</p>
-        if (twinPhase === 'init_nodes' || twinPhase === 'final_nodes') return (
+        if (twinPhase === 'init_nodes' || twinPhase === 'verifying_nodes' || twinPhase === 'final_nodes') return (
             <div className="action-row fade-in">
                 <div className="action-details">
                     <h4>Pre-Event Distribution Strategy</h4>
                     <p>AI suggests allocating 40% of personnel to {currentNodes[0]?.name} based on node topology.</p>
                 </div>
-                <button className="pro-btn primary" onClick={() => setTwinPhase(twinPhase === 'init_nodes' ? 'final_nodes' : 'live')}>
-                    {twinPhase === 'init_nodes' ? 'Verify Nodes' : 'Deploy & Go Live'}
+                <button className="pro-btn primary" onClick={() => {
+                    if (twinPhase === 'init_nodes') {
+                        setTwinPhase('verifying_nodes');
+                        setTwinProgress(0);
+                    } else if (twinPhase === 'final_nodes') {
+                        setTwinPhase('live');
+                    }
+                }} disabled={twinPhase === 'verifying_nodes'}>
+                    {twinPhase === 'init_nodes' ? 'Verify Nodes' : twinPhase === 'verifying_nodes' ? 'Verifying...' : 'Deploy & Go Live'}
                 </button>
             </div>
         )
@@ -114,7 +146,6 @@ const DemoDashboard: React.FC = () => {
                 return (
                     <div className="relative-container fade-in">
                         <video src="/assets/Post Heatmap.mp4" autoPlay loop muted className="full-asset" />
-                        <div className="success-badge">Mishap Averted/Handled</div>
                     </div>
                 )
         }
@@ -162,18 +193,28 @@ const DemoDashboard: React.FC = () => {
                                     <span>Background Simulations Running... {simProgress}%</span>
                                 </>
                             ) : (
-                                <div className="action-details">
-                                    <h4>Actionable Step (Post-Simulation)</h4>
-                                    <p>Simulations complete. Optimal action: <strong>Halt inflows to Sector B</strong>.</p>
+                                <div className="action-details" style={{ width: '100%' }}>
+                                    <h4>Actionable Resolution Plan (Post-Simulation)</h4>
+                                    <ul className="action-list" style={{ listStyleType: 'none', padding: 0, margin: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        <li style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '4px', borderLeft: '3px solid var(--amber)' }}>
+                                            <strong>1. Primary Halt:</strong> Halt inflows to Sector B via Central Hub.
+                                        </li>
+                                        <li style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '4px', borderLeft: '3px solid var(--primary)' }}>
+                                            <strong>2. Redeployment:</strong> Dispatch Alpha to clear Stairwell B.
+                                        </li>
+                                        <li style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '4px', borderLeft: '3px solid var(--green)' }}>
+                                            <strong>3. Evacuation Bypass:</strong> Open East Ramps for controlled egress.
+                                        </li>
+                                    </ul>
                                 </div>
                             )}
                         </div>
                         {simProgress >= 100 && (
-                            <div className="btn-group">
-                                <div className="command-directive glass small">
-                                    <code className="green-text">DIRECT_GROUND: "Lockdown Level 2."</code>
+                            <div className="btn-group" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                                <div className="command-directive glass small" style={{ marginBottom: '0.5rem' }}>
+                                    <code className="green-text">DIRECT_GROUND: "Execute Protocol Omega."</code>
                                 </div>
-                                <button className="pro-btn success" onClick={() => setPredPhase('resolved')}>Mark as Handled</button>
+                                <button className="pro-btn success" onClick={() => setPredPhase('resolved')}>Return to Monitoring</button>
                             </div>
                         )}
                     </div>
