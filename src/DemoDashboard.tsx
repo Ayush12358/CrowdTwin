@@ -27,17 +27,17 @@ const DemoDashboard: React.FC = () => {
     const [simProgress, setSimProgress] = useState(0)
 
     // Mock Data for Right Pane
-    const currentNodes: RiskNode[] = [
+    const currentNodes = ([
         { id: 'N1', name: 'South Gate Choke', riskScore: 68, status: 'Medium' },
         { id: 'E4', name: 'East Corridor', riskScore: 45, status: 'Low' },
         { id: 'N7', name: 'Main Concourse', riskScore: 82, status: 'High' },
-    ].sort((a, b) => b.riskScore - a.riskScore)
+    ] as RiskNode[]).sort((a, b) => b.riskScore - a.riskScore)
 
-    const predictedNodes: RiskNode[] = [
+    const predictedNodes = ([
         { id: 'N2', name: 'North Gate Tunnel', riskScore: 92, status: 'High' },
         { id: 'E9', name: 'Stairwell B', riskScore: 88, status: 'High' },
         { id: 'N11', name: 'West Plaza Exit', riskScore: 75, status: 'Medium' },
-    ].sort((a, b) => b.riskScore - a.riskScore)
+    ] as RiskNode[]).sort((a, b) => b.riskScore - a.riskScore)
 
     // --- Tab 1: Crowd Twin Renderers ---
 
@@ -66,7 +66,7 @@ const DemoDashboard: React.FC = () => {
             <div className="action-row fade-in">
                 <div className="action-details">
                     <h4>Pre-Event Distribution Strategy</h4>
-                    <p>AI suggests allocating 40% of personnel to {currentNodes[0].name} based on node topology.</p>
+                    <p>AI suggests allocating 40% of personnel to {currentNodes[0]?.name} based on node topology.</p>
                 </div>
                 <button className="pro-btn primary" onClick={() => setTwinPhase(twinPhase === 'init_nodes' ? 'final_nodes' : 'live')}>
                     {twinPhase === 'init_nodes' ? 'Verify Nodes' : 'Deploy & Go Live'}
@@ -77,7 +77,7 @@ const DemoDashboard: React.FC = () => {
             <div className="action-row fade-in">
                 <div className="action-details">
                     <h4>Live Monitoring Active</h4>
-                    <p>Current high-risk sector: {currentNodes[0].name}. Personnel are on standby.</p>
+                    <p>Current high-risk sector: {currentNodes[0]?.name}. Personnel are on standby.</p>
                 </div>
                 <button className="pro-btn secondary" onClick={() => setActiveTab('predictions')}>View Predictions</button>
             </div>
