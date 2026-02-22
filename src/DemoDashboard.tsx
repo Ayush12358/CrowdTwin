@@ -1,519 +1,333 @@
-import { useState, useEffect, useMemo } from 'react'
-import { API_STUBS, Zone, ForecastEvent, Recommendation, USER_STORIES, Story } from './api/mockData'
+import React, { useState, useEffect } from 'react'
 import { useTheme } from './ThemeContext'
-import { MapContainer, TileLayer, Circle, Marker, Polyline, CircleMarker, Popup } from 'react-leaflet'
-import L from 'leaflet'
-import './styles/MapStyles.css'
+import './styles/index.css'
 
-// Fix for default Leaflet icon not showing correctly in some setups
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+// Linear Operational Phases
+type Phase = 'strategize' | 'monitor' | 'prevention' | 'response'
 
-function DemoDashboard() {
-    const [activeScreen, setActiveScreen] = useState('overview')
-    const [activeStoryId, setActiveStoryId] = useState<string | null>(null)
-    const [showObjective, setShowObjective] = useState(false)
-    const [liveData, setLiveData] = useState(API_STUBS.getLiveDensity())
-    const [forecast, setForecast] = useState(API_STUBS.getForecast())
-    const [executedRecs, setExecutedRecs] = useState<string[]>([])
-    const [selectedMapZone, setSelectedMapZone] = useState<string | null>(null)
-
-    // Theme and Accent State from Global Context
+const DemoDashboard: React.FC = () => {
     const { theme, setTheme, accent, setAccent } = useTheme()
+    const [currentPhase, setCurrentPhase] = useState<Phase>('strategize')
+    const [subStep, setSubStep] = useState(0) // Internal step within a phase
+    const [isSimulating, setIsSimulating] = useState(false)
+    const [alerts, setAlerts] = useState<string[]>([])
+    const [mishapResolved, setMishapResolved] = useState(false)
+    const [selectedAction, setSelectedAction] = useState<string | null>(null)
+    const [simProgress, setSimProgress] = useState(0)
 
-    // Active story metadata
-    const activeStory = useMemo(() =>
-        USER_STORIES.find(s => s.id === activeStoryId),
-        [activeStoryId])
-
-    // Simulate live updates
+    // Global Effect for Phase 4 Simulation
     useEffect(() => {
-        const interval = setInterval(() => {
-            setLiveData(API_STUBS.getLiveDensity())
-        }, 5000)
-        return () => clearInterval(interval)
-    }, [])
+        if (currentPhase === 'response' && subStep === 1 && simProgress < 100) {
+            const timer = setTimeout(() => setSimProgress(p => p + 5), 100)
+            return () => clearTimeout(timer)
+        }
+    }, [currentPhase, subStep, simProgress])
 
-    const handleExecute = (id: string) => {
-        setExecutedRecs(prev => [...prev, id])
-        // If it's the first story, move to staff terminal after execution
-        if (activeStoryId === 'safety_first') {
-            setTimeout(() => setActiveScreen('staff'), 1000)
+    // Phase Configuration
+    const phases = [
+        { id: 'strategize', label: '1. STRATEGIZE', desc: 'Pre-Event Planning' },
+        { id: 'monitor', label: '2. MONITOR', desc: 'Live Surveillance' },
+        { id: 'prevention', label: '3. PREVENTION', desc: 'Problem Finding' },
+        { id: 'response', label: '4. RESPONSE', desc: 'Solution Finding' }
+    ]
+
+    // State Transitions
+    const nextStep = () => setSubStep(prev => prev + 1)
+    const resetSubStep = (newPhase: Phase) => {
+        setCurrentPhase(newPhase)
+        setSubStep(0)
+        setSimProgress(0)
+        setMishapResolved(false)
+        setSelectedAction(null)
+    }
+
+    // Phase 1: Strategize Sub-renders
+    const renderStrategize = () => {
+        switch (subStep) {
+            case 0: // Upload
+                return (
+                    <div className="phase-card center-content">
+                        <div className="upload-zone" onClick={nextStep}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                            </svg>
+                            <h3>Upload Venue Map</h3>
+                            <p>Upload architectural layout for AI Node mapping</p>
+                            <div className="pro-btn primary">Select Files</div>
+                        </div>
+                    </div>
+                )
+            case 1: // Node/Route Generation
+                return (
+                    <div className="phase-card">
+                        <div className="map-view-container">
+                            <img src="/abstract-campus.svg" alt="Map" style={{ width: '100%', opacity: 0.3 }} />
+                            <div className="overlay-nodes">
+                                {/* Visual simulation of nodes being generated */}
+                                <div className="node pulse" style={{ top: '40%', left: '30%' }}></div>
+                                <div className="node pulse" style={{ top: '40%', left: '70%' }}></div>
+                                <div className="node pulse" style={{ top: '60%', left: '50%' }}></div>
+                                <svg className="connector-lines" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                                    <line x1="30%" y1="40%" x2="50%" y2="60%" stroke="var(--primary)" strokeDasharray="5,5" />
+                                    <line x1="70%" y1="40%" x2="50%" y2="60%" stroke="var(--primary)" strokeDasharray="5,5" />
+                                </svg>
+                            </div>
+                            <div className="floating-insights glass">
+                                <h4>AI Node Mapping</h4>
+                                <ul>
+                                    <li>64 Critical Flow Nodes Found</li>
+                                    <li>3 Major Bottleneck Routes Identified</li>
+                                </ul>
+                                <button className="pro-btn primary small" onClick={nextStep}>Verify & Edit Routes</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            case 2: // Distribution
+                return (
+                    <div className="phase-card">
+                        <div className="split-view">
+                            <div className="map-side">
+                                <img src="/abstract-campus.svg" alt="Map" style={{ width: '100%', opacity: 0.5 }} />
+                                <div className="personnel-dot" style={{ top: '35%', left: '28%' }}>S1</div>
+                                <div className="personnel-dot" style={{ top: '35%', left: '72%' }}>S2</div>
+                            </div>
+                            <div className="control-side">
+                                <h3>Strategic Distribution</h3>
+                                <p>AI Recommendation: Personnel training required for Gate 4 and Sector B.</p>
+                                <div className="stat-card mini">
+                                    <small>Personnel Required</small>
+                                    <div className="value">148 Units</div>
+                                </div>
+                                <button className="pro-btn secondary" onClick={() => resetSubStep('monitor')}>Finalize & Go Live</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            default: return null
         }
     }
 
-    const selectStory = (id: string) => {
-        setActiveStoryId(id)
-        setShowObjective(true)
-        // Auto-navigate to starting screen if needed
-        if (id === 'safety_first') setActiveScreen('heatmap')
-        if (id === 'structural_fix') setActiveScreen('stress')
-        if (id === 'audit_trail') setActiveScreen('analytics')
-    }
+    // Phase 2: Monitor
+    const renderMonitor = () => (
+        <div className="phase-card no-padding">
+            <div className="live-monitor-grid">
+                <div className="video-viewport">
+                    <video src="/assets/Live%20Heatmap.mp4" autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div className="telemetry-hud pulse-line">LIVE FEED: STADIUM_MAIN</div>
+                </div>
+                <div className="alerts-sidebar glass">
+                    <h3>Hazard Monitoring</h3>
+                    <div className="alert-item amber" onClick={() => resetSubStep('prevention')} style={{ marginBottom: '1rem' }}>
+                        <div className="alert-header">POTENTIAL MISHAP (Problem Finding)</div>
+                        <p>Density surge detected at Sector A Exit. Lead time: 8m.</p>
+                        <small>Investigate Prevention →</small>
+                    </div>
+                    <div className="alert-item red" onClick={() => resetSubStep('response')}>
+                        <div className="alert-header">CRITICAL MISHAP (Solution Finding)</div>
+                        <p>Active incident at Stairwell 2. Immediate response required!</p>
+                        <small>Deploy Solution →</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 
-    const renderAgents = (zoneId: string, count: number) => {
-        // Obsolete as we moved SVG drawing logic to the heatmap element for direct coordinates mapping
-        return null;
-    }
+    // Phase 3: Prevention (Problem Finding)
+    const renderPrevention = () => (
+        <div className="phase-card">
+            <div className="crisis-dashboard">
+                <div className="header-alert red">
+                    <h2>Mishap Prediction: Crowd Crush Risk</h2>
+                    <p>Location: North Gate Tunnel | Risk Score: 92%</p>
+                </div>
+                <div className="suggestions-grid">
+                    <div className={`suggestion-card ${selectedAction === 'open' ? 'active' : ''}`} onClick={() => setSelectedAction('open')}>
+                        <h4>Recommendation 1</h4>
+                        <p>Open Emergency Exit 4 to redistribute flow.</p>
+                    </div>
+                    <div className={`suggestion-card ${selectedAction === 'divert' ? 'active' : ''}`} onClick={() => setSelectedAction('divert')}>
+                        <h4>Recommendation 2</h4>
+                        <p>Divert incoming crowd to West Plaza.</p>
+                    </div>
+                </div>
+                {selectedAction && !mishapResolved && (
+                    <div className="command-directive glass animate-in">
+                        <h3>COMMAND CENTRE DIRECTIVE</h3>
+                        <p className="code-font">DIRECT_TO_GROUND: "Team Alpha, open gate 4 immediately and guide crowd to sector C."</p>
+                        <button className="pro-btn primary" onClick={() => setMishapResolved(true)}>Execute Action</button>
+                    </div>
+                )}
+                {mishapResolved && (
+                    <div className="result-alert success animate-in">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <span>MISHAP AVERTED: Normal flow resumed at North Gate.</span>
+                        <button className="pro-btn secondary small" style={{ marginLeft: '1rem' }} onClick={() => { setMishapResolved(false); setSelectedAction(null); resetSubStep('monitor'); }}>Resume Monitoring</button>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
 
-    const renderScreen = () => {
-        switch (activeScreen) {
-            case 'overview':
+    // Phase 4: Response (Solution Finding)
+    const renderResponse = () => {
+
+        switch (subStep) {
+            case 0: // Detection
                 return (
-                    <div className="screen-overview">
-                        <div className="dashboard-header">
-                            <div className="header-left">
-                                <h1>Crowd-Twin Real-time Monitor</h1>
+                    <div className="phase-card">
+                        <div className="incident-alert red animate-pulse">
+                            <div className="icon">⚠️</div>
+                            <div className="content">
+                                <h2>CRITICAL MISHAP DETECTED</h2>
+                                <p>Structural bottleneck failure at Stairwell 2. Active injuries reported.</p>
                             </div>
-                            <div className="header-right">
-                                <div className="search-bar">
-                                    <span>🔍</span>
-                                    <input type="text" placeholder="Search venues or zones..." />
-                                </div>
-                                <div className="user-profile">
-                                    <div className="avatar"></div>
-                                    <span style={{ fontWeight: 600 }}>Ayush M.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="stat-row">
-                            <div className="pro-stat-card">
-                                <div className="stat-icon-wrap">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                </div>
-                                <div className="stat-info">
-                                    <h4>Max Density</h4>
-                                    <div className="value">6.8 <small>p/m²</small></div>
-                                </div>
-                            </div>
-                            <div className="pro-stat-card">
-                                <div className="stat-icon-wrap">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="15" y2="22"></line><line x1="9" y1="18" x2="15" y2="18"></line><line x1="9" y1="14" x2="15" y2="14"></line><line x1="9" y1="10" x2="15" y2="10"></line></svg>
-                                </div>
-                                <div className="stat-info">
-                                    <h4>Venue Capacity</h4>
-                                    <div className="value">92%</div>
-                                </div>
-                            </div>
-                            <div className="pro-stat-card" style={{ borderLeft: '4px solid var(--amber)' }}>
-                                <div className="stat-icon-wrap" style={{ color: 'var(--amber)' }}>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                                </div>
-                                <div className="stat-info">
-                                    <h4>Predicted Alerts</h4>
-                                    <div className="value">3</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="dashboard-grid">
-                            <div className="forecast-card">
-                                <div className="chart-header">
-                                    <h3>Occupancy Forecast</h3>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                        <span style={{ marginRight: '1rem' }}>— Actual</span>
-                                        <span style={{ borderBottom: '1px dashed var(--primary)' }}>- - Predicted</span>
-                                    </div>
-                                </div>
-                                <div className="chart-viz">
-                                    <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
-                                        <path d="M0 180 Q100 160 200 120 T400 60" fill="none" stroke="var(--primary)" strokeWidth="3" />
-                                        <path d="M0 180 Q100 160 200 120 T400 40" fill="none" stroke="var(--primary)" strokeWidth="2" strokeDasharray="5,5" opacity="0.5" />
-                                        <path d="M200 120 Q300 100 500 20" fill="rgba(0,136,255,0.1)" />
-                                    </svg>
-                                    <div style={{ position: 'absolute', bottom: '-20px', left: 0, width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                        <span>14:00</span><span>16:00</span><span>18:00</span><span>20:00</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="gate-table-card">
-                                <h3>Active Gates</h3>
-                                <table className="pro-table">
-                                    <thead>
-                                        <tr><th>Name</th><th>Status</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr><td>Vindhya Main Path</td><td><span className="gate-pill open">OPEN</span></td></tr>
-                                        <tr><td>Himalaya Side Exit</td><td><span className="gate-pill closed">CLOSED</span></td></tr>
-                                        <tr><td>Main Stage VIP</td><td><span className="gate-pill open">OPEN</span></td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <button className="pro-btn primary" onClick={nextStep}>Search for Solutions</button>
                         </div>
                     </div>
                 )
-            case 'heatmap':
+            case 1: // Simulation
                 return (
-                    <div className="screen-heatmap pro-map" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', overflow: 'hidden' }}>
-                        <div className="map-controls-top">
-                            <div className="search-bar" style={{ background: 'var(--card-bg)' }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                <input type="text" placeholder="Search Location (e.g. Felicity Ground)..." style={{ background: 'transparent', color: 'var(--text-main)', border: 'none', outline: 'none', width: '250px' }} />
+                    <div className="phase-card center-content">
+                        <div className="sim-loading">
+                            <div className="spinner"></div>
+                            <h3>Running Rescue Simulations...</h3>
+                            <div className="progress-bar">
+                                <div className="fill" style={{ width: `${simProgress}%` }}></div>
                             </div>
-                        </div>
-                        <div className="map-container" style={{ flex: 1, backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px', position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '350px' }}>
-                            <MapContainer center={[17.4455, 78.3485]} zoom={17} style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }} attributionControl={false} zoomControl={false} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} touchZoom={false}>
-                                <TileLayer
-                                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                />
-
-                                {/* Heat Zones */}
-                                <Circle center={[17.446, 78.348]} radius={35} pathOptions={{ color: 'var(--red)', fillColor: 'var(--red)', fillOpacity: 0.3 }} />
-                                <Circle center={[17.445, 78.349]} radius={45} pathOptions={{ color: 'var(--amber)', fillColor: 'var(--amber)', fillOpacity: 0.3 }} />
-
-                                {/* Interaction Catchers */}
-                                <Circle center={[17.446, 78.348]} radius={35} pathOptions={{ color: 'transparent', fillColor: 'transparent' }} eventHandlers={{ click: () => setSelectedMapZone(selectedMapZone === 'ground' ? null : 'ground') }} />
-                                <Circle center={[17.445, 78.349]} radius={45} pathOptions={{ color: 'transparent', fillColor: 'transparent' }} eventHandlers={{ click: () => setSelectedMapZone(selectedMapZone === 'himalaya' ? null : 'himalaya') }} />
-                                <Circle center={[17.444, 78.348]} radius={25} pathOptions={{ color: 'transparent', fillColor: 'transparent' }} eventHandlers={{ click: () => setSelectedMapZone(selectedMapZone === 'vindhya' ? null : 'vindhya') }} />
-
-                                {/* Agents Map */}
-                                {liveData.zones.map((zone, idx) => {
-                                    const count = zone.count;
-                                    const agents = [];
-                                    const isRed = zone.id === 'sector_b' && activeStoryId === 'safety_first';
-
-                                    // Base coordinates
-                                    let lat = 17.446, lng = 78.348, spreadLat = 0.0003, spreadLng = 0.0003;
-                                    if (idx === 1) { lat = 17.445; lng = 78.349; spreadLat = 0.0004; spreadLng = 0.0004; } // Food Court
-                                    if (idx === 2) { lat = 17.444; lng = 78.348; spreadLat = 0.0002; spreadLng = 0.0002; } // Vindhya Pathways
-
-                                    for (let i = 0; i < count / 10; i++) {
-                                        const rLat = lat + (Math.random() - 0.5) * spreadLat;
-                                        const rLng = lng + (Math.random() - 0.5) * spreadLng;
-
-                                        // Ensure dots pulsate randomly via styles inherited from CSS
-                                        const iconHtml = `<div class="agent-dot-leaflet ${isRed ? 'red' : (idx === 1 ? 'amber' : '')}" style="animation-delay: ${Math.random() * 2}s"></div>`;
-                                        const customIcon = L.divIcon({ html: iconHtml, className: 'agent-marker', iconSize: [8, 8], iconAnchor: [4, 4] });
-
-                                        agents.push(<Marker key={`agent-${zone.id}-${i}`} position={[rLat, rLng]} icon={customIcon} />);
-                                    }
-                                    return agents;
-                                })}
-                            </MapContainer>
-                            <div className="map-legend" style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'var(--bg-surface)', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.8rem', border: '1px solid var(--border-color)' }}>
-                                <span>Density: <span style={{ color: 'var(--red)' }}>●</span> High <span style={{ color: 'var(--amber)' }}>●</span> Medium <span style={{ color: 'var(--text-main)' }}>●</span> Low</span>
-                            </div>
-                        </div>
-                        {selectedMapZone && (
-                            <div className="zone-detail-panel" style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--primary)', marginTop: '1rem', animation: 'fadeIn 0.3s' }}>
-                                <h3>{selectedMapZone === 'ground' ? 'Felicity Ground' : selectedMapZone === 'himalaya' ? 'Himalaya Block' : 'Vindhya Pathway'}</h3>
-                                <p style={{ color: 'var(--text-muted)' }}>Status: {selectedMapZone === 'ground' ? 'CRITICAL (6.8 p/m²)' : 'Normal (1.5 p/m²)'}</p>
-                            </div>
-                        )}
-                        <div className="stats-grid" style={{ marginTop: '0', flexShrink: 0 }}>
-                            {liveData.zones.map(zone => (
-                                <div key={zone.id} className="pro-stat-card mini" style={{ padding: '1rem' }}>
-                                    <div className="stat-info">
-                                        <h4>{zone.name === 'Sector B: Level 1' ? 'Main Stage' : zone.name === 'North Entrance' ? 'Food Court' : 'Pathways'}</h4>
-                                        <div className="value" style={{ fontSize: '1.2rem' }}>{zone.density} <small>p/m²</small></div>
-                                    </div>
-                                </div>
-                            ))}
+                            <p className="code-font">Simulating Scenario {simProgress < 50 ? 'A (Evacuation)' : 'B (Containment)'}</p>
+                            {simProgress >= 100 && <button className="pro-btn primary" onClick={nextStep}>View Actionable Steps</button>}
                         </div>
                     </div>
                 )
-            case 'predictive':
+            case 2: // Result
                 return (
-                    <div className="screen-predictive" style={{ padding: '2rem' }}>
-                        <div className="prediction-alert">
-                            <div className="alert-header">DENSITY SURGE PREDICTED (15M LEAD TIME)</div>
-                            <p><strong>Felicity Main Stage</strong></p>
-                            <p>Current: 4.8 p/m² | Expected: 7.4 p/m²</p>
-                            <div className="confidence-meter">
-                                <div className="meter-fill" style={{ width: '92%' }}></div>
+                    <div className="phase-card">
+                        <div className="solution-panel">
+                            <h3>OPTIMIZED RESPONSE ACTION</h3>
+                            <div className="action-step active">
+                                <div className="step-num">Step 1</div>
+                                <p>Halt all inflows to Sector B via Central Hub.</p>
                             </div>
-                            <small>Simulation Confidence: 92% (ABM Score: 0.88)</small>
-                        </div>
-                        <div className="timeline">
-                            <div className="time-point active">T-15m</div>
-                            <div className="time-line"></div>
-                            <div className="time-point">T-10m</div>
-                            <div className="time-line"></div>
-                            <div className="time-point">T-5m</div>
-                            <div className="time-line"></div>
-                            <div className="time-point">CRITICAL</div>
+                            <div className="directive-box glass">
+                                <h4>Ground Force Instruction</h4>
+                                <p className="code-font">TO_ALL_UNITS: "Full lockdown of Level 2. Evacuate via East Ramps."</p>
+                            </div>
+                            <button className="pro-btn success" onClick={nextStep}>Mark as Handled</button>
                         </div>
                     </div>
                 )
-            case 'alerts':
-            case 'command':
+            case 3: // Handled
                 return (
-                    <div className="screen-mission">
-                        <div className="mission-grid">
-                            <div className="venue-viewport">
-                                <div className="viewport-header">VENUE MAP - PREDICTIVE VIEW</div>
-                                <div className="isometric-map">
-                                    <MapContainer center={[17.4455, 78.3485]} zoom={17.5} style={{ width: '100%', height: '100%' }} attributionControl={false} dragging={false} scrollWheelZoom={false}>
-                                        <TileLayer
-                                            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                        />
-
-                                        {/* Path highlighting */}
-                                        <Polyline
-                                            positions={[
-                                                [17.446, 78.348], // Main Stage
-                                                [17.4455, 78.3485],
-                                                [17.445, 78.349], // Himalaya
-                                                [17.444, 78.348]  // Vindhya exit
-                                            ]}
-                                            pathOptions={{ color: 'var(--amber)', weight: 4, dashArray: '10, 10' }}
-                                        />
-
-                                        <Polyline
-                                            positions={[
-                                                [17.446, 78.348],
-                                                [17.4455, 78.3485]
-                                            ]}
-                                            pathOptions={{ color: 'var(--red)', weight: 6 }}
-                                            className="pulse-animate"
-                                        />
-
-                                        <CircleMarker center={[17.446, 78.348]} radius={15} pathOptions={{ color: 'var(--red)', fillColor: 'var(--red)', fillOpacity: 0.8 }}>
-                                            <Popup>Main Stage - Critical</Popup>
-                                        </CircleMarker>
-                                    </MapContainer>
-                                    <div className="map-alert-tag">
-                                        <div className="tag-header">PREDICTIVE ALERT: MAIN STAGE SURGE</div>
-                                        <div className="tag-time">TIME TO CRITICAL: 04:32</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="control-panel">
-                                <div className="panel-section">
-                                    <h3>ACTIVE ALERTS</h3>
-                                    <div className="alert-tiles">
-                                        {forecast.forecastedEvents.map((event, i) => (
-                                            <div key={i} className="alert-tile critical">
-                                                <div className="tile-body">
-                                                    <div>PREDICTIVE ALERT: {event.type.replace('_', ' ')}</div>
-                                                    <small>Time To Critical: 10:30 PM</small>
-                                                </div>
-                                                <div className="tile-timer">04:32</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="panel-section">
-                                    <h3>RESPONSE PROTOCOLS</h3>
-                                    <div className="protocol-btns">
-                                        {forecast.recommendations.map(rec => (
-                                            <button
-                                                key={rec.id}
-                                                className={`protocol-btn ${executedRecs.includes(rec.id) ? 'executed' : ''}`}
-                                                onClick={() => handleExecute(rec.id)}
-                                            >
-                                                {rec.action}
-                                                {executedRecs.includes(rec.id) && <span className="check">✓</span>}
-                                            </button>
-                                        ))}
-                                        <button className="protocol-btn secondary">ALERTS LOG</button>
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="phase-card center-content">
+                        <div className="handled-confirm">
+                            <div className="big-check">✓</div>
+                            <h2>MISHAP HANDLED</h2>
+                            <p>Area secured. Safety protocol Gamma engaged.</p>
+                            <button className="pro-btn secondary" onClick={() => resetSubStep('monitor')}>Back to Active Monitoring</button>
                         </div>
                     </div>
                 )
-            case 'staff':
-                return (
-                    <div className="screen-staff">
-                        <div className="mobile-view">
-                            <div className="mobile-header">COMMAND TERMINAL - SECTOR HIMALAYA</div>
-                            <div className="mobile-content">
-                                {executedRecs.length > 0 ? (
-                                    <div className="directive-notice">
-                                        <h3>NEW DIRECTIVE</h3>
-                                        <p><strong>Location:</strong> Post 4 - Food Court Entrance</p>
-                                        <p><strong>Current Flow:</strong> 45 p/min</p>
-                                        <div style={{ margin: '1rem 0', padding: '1rem', background: 'rgba(255,170,0,0.1)', border: '1px solid var(--amber)', borderRadius: '8px', color: 'var(--amber)', fontSize: '0.9rem' }}>
-                                            Deploy 3 personnel to widen barrier B. Expect surge from Main Stage in 4 mins.
-                                        </div>
-                                        <button className="ack-btn" onClick={() => setActiveScreen('outcome')}>Acknowledge & Sync</button>
-                                    </div>
-                                ) : (
-                                    <div style={{ textAlign: 'center', opacity: 0.5, marginTop: '4rem' }}>
-                                        No active directives...
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )
-            case 'outcome':
-                return (
-                    <div className="screen-outcome" style={{ padding: '2rem' }}>
-                        <h3>Forecast Outcome: Intervention Delta</h3>
-                        <div className="comparison-view">
-                            <div className="view-pane">
-                                <h4>Without Action</h4>
-                                <div className="graph-bar red" style={{ height: '80%' }}></div>
-                                <div className="outcome-label">7.4 p/m²</div>
-                            </div>
-                            <div className="view-pane">
-                                <h4>With Directive</h4>
-                                <div className="graph-bar green" style={{ height: '40%' }}></div>
-                                <div className="outcome-label">4.2 p/m²</div>
-                                <div className="outcome-delta">↓ 43% Prediction Error Reduction</div>
-                            </div>
-                        </div>
-                    </div>
-                )
-            case 'stress':
-            case 'bottleneck':
-                return (
-                    <div className="screen-stress" style={{ padding: '2rem' }}>
-                        <div className="analysis-card high-fidelity">
-                            <div className="mockup-header-lite">3D STRUCTURAL ANALYSIS</div>
-                            <div className="analysis-visual">
-                                {/* Use code-driven visual to ensure people are implied by data dots, rather than empty photography */}
-                                <div className="video-placeholder" style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '4px', width: '80%', height: '80%' }}>
-                                        {[...Array(100)].map((_, i) => (
-                                            <div key={i} style={{ background: i < 80 ? 'var(--red)' : 'var(--text-muted)', borderRadius: '2px', opacity: i < 80 ? 0.8 : 0.3 }} />
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="analysis-overlay">
-                                    <div className="alert-header" style={{ color: 'var(--red)' }}>STRUCTURAL BOTTLENECK DETECTED</div>
-                                    <h3>Himalaya Ramp</h3>
-                                    <p>Physical Capacity: 200 p/m</p>
-                                    <p>Peak Simulated Demand: 350 p/m</p>
-                                </div>
-                            </div>
-                            <div className="insight-banner" style={{ marginTop: '2rem' }}>
-                                <h4>Simulation Insight</h4>
-                                <p>Agents exhibit "Stairwell Hesitation" behavior, reducing effective width by 20%.</p>
-                            </div>
-                        </div>
-                    </div>
-                )
-            case 'analytics':
-                return (
-                    <div className="screen-analytics" style={{ padding: '2rem' }}>
-                        <div className="kpi-dashboard">
-                            <div className="kpi-card"><h3>9.8</h3><p>Safety Score</p></div>
-                            <div className="kpi-card"><h3>100%</h3><p>Alert Response</p></div>
-                            <div className="kpi-card"><h3>0</h3><p>Incidents</p></div>
-                        </div>
-                    </div>
-                )
-            case 'playback':
-                return (
-                    <div className="screen-playback" style={{ padding: '2rem' }}>
-                        <div className="placeholder-card">
-                            <h2>Simulation Playback</h2>
-                            <p>Accuracy Score: <strong>94.2%</strong></p>
-                            <div className="video-placeholder" style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#64748b' }}>
-                                SIMULATION REPLAY: 18:00 (Incident ID #82)
-                            </div>
-                        </div>
-                    </div>
-                )
-            default:
-                return <div>Select a screen</div>
+            default: return null
         }
     }
 
     return (
-        <div className="app-container">
-            <nav className="sidebar">
-                <div className="logo" onClick={() => window.location.href = '/'}>CROWD-TWIN</div>
-                <ul>
-                    <li className={activeScreen === 'overview' ? 'active' : ''} onClick={() => setActiveScreen('overview')}>SaaS Overview</li>
-                    <li className={activeScreen === 'heatmap' ? 'active' : ''} onClick={() => setActiveScreen('heatmap')}>Live Heatmap</li>
-                    <li className={activeScreen === 'predictive' ? 'active' : ''} onClick={() => setActiveScreen('predictive')}>Predictive Mode</li>
-                    <li className={activeScreen === 'alerts' ? 'active' : ''} onClick={() => setActiveScreen('alerts')}>Safety Alerts</li>
-                    <li className={activeScreen === 'command' ? 'active' : ''} onClick={() => setActiveScreen('command')}>Command Panel</li>
-                    <li className={activeScreen === 'staff' ? 'active' : ''} onClick={() => setActiveScreen('staff')}>Staff Terminal</li>
-                    <li className={activeScreen === 'outcome' ? 'active' : ''} onClick={() => setActiveScreen('outcome')}>Outcome Forecast</li>
-                    <li className={activeScreen === 'stress' ? 'active' : ''} onClick={() => setActiveScreen('stress')}>Stress Test</li>
-                    <li className={activeScreen === 'bottleneck' ? 'active' : ''} onClick={() => setActiveScreen('bottleneck')}>Bottleneck Analysis</li>
-                    <li className={activeScreen === 'analytics' ? 'active' : ''} onClick={() => setActiveScreen('analytics')}>Safety Analytics</li>
-                    <li className={activeScreen === 'playback' ? 'active' : ''} onClick={() => setActiveScreen('playback')}>Sim Playback</li>
-                </ul>
-
-                {/* Theme & Accent Controls */}
-                <div className="theme-controls" style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid var(--border-color)' }}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Theme</div>
-                        <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--card-bg)', padding: '0.2rem', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
-                            <button
-                                onClick={() => setTheme('dark')}
-                                style={{ flex: 1, padding: '0.5rem', borderRadius: '16px', border: 'none', background: theme === 'dark' ? 'var(--bg-main)' : 'transparent', color: theme === 'dark' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.3s' }}
-                            >
-                                Dark
-                            </button>
-                            <button
-                                onClick={() => setTheme('light')}
-                                style={{ flex: 1, padding: '0.5rem', borderRadius: '16px', border: 'none', background: theme === 'light' ? 'var(--bg-main)' : 'transparent', color: theme === 'light' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.3s' }}
-                            >
-                                Light
-                            </button>
-                        </div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Accent</div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button onClick={() => setAccent({ h: 210, s: '100%', l: '50%' })} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'hsl(210, 100%, 50%)', border: accent.h === 210 ? '2px solid #fff' : '2px solid transparent', cursor: 'pointer' }} title="Blue"></button>
-                            <button onClick={() => setAccent({ h: 150, s: '80%', l: '40%' })} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'hsl(150, 80%, 40%)', border: accent.h === 150 ? '2px solid #fff' : '2px solid transparent', cursor: 'pointer' }} title="Emerald"></button>
-                            <button onClick={() => setAccent({ h: 280, s: '80%', l: '60%' })} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'hsl(280, 80%, 60%)', border: accent.h === 280 ? '2px solid #fff' : '2px solid transparent', cursor: 'pointer' }} title="Purple"></button>
-                        </div>
-                    </div>
+        <div className={`app-container ${theme}`} style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+            {/* Mission Timeline Header */}
+            <header className="mission-timeline">
+                <div className="logo-group">
+                    <div className="logo">CrowdTwin</div>
+                    <div className="mission-status pulse">● LIVE_OPERATIONS</div>
                 </div>
-            </nav>
-            <main className="content">
-                {/* STORY SELECTOR */}
-                <div className="story-selector">
-                    {USER_STORIES.map(story => (
-                        <button
-                            key={story.id}
-                            className={`story-btn ${activeStoryId === story.id ? 'active' : ''}`}
-                            onClick={() => selectStory(story.id)}
-                        >
-                            {story.title}
-                        </button>
+                <div className="phase-nav">
+                    {phases.map(p => (
+                        <div key={p.id} className={`phase-item ${currentPhase === p.id ? 'active' : ''}`} onClick={() => resetSubStep(p.id as Phase)}>
+                            <div className="label">{p.label}</div>
+                            <div className="desc">{p.desc}</div>
+                        </div>
                     ))}
                 </div>
-
-                {/* OBJECTIVE OVERLAY */}
-                {showObjective && activeStory && (
-                    <div className="objective-overlay">
-                        <h2>Objective</h2>
-                        <p>{activeStory.objective}</p>
-                        <button onClick={() => setShowObjective(false)}>Start Story Flow</button>
-                    </div>
-                )}
-
-                <header>
-                    <div>
-                        <h1>{activeScreen.replace(/^\w/, (c) => c.toUpperCase()).replace(/([A-Z])/g, ' $1').trim()}</h1>
-                        {activeStory && (
-                            <span style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 700 }}>
-                                ACTIVE STORY: {activeStory.title}
-                            </span>
-                        )}
-                    </div>
-                    <div className={`status-indicator ${liveData.venueStatus === 'Red' ? 'red' : 'amber'}`}>
-                        {liveData.venueStatus === 'Red' ? 'CRITICAL SURGE' : 'MONITORING LEAD TIME'}
-                    </div>
-                </header>
-
-                {/* INSIGHT BANNER */}
-                {activeStory && !showObjective && (
-                    <div className="insight-banner">
-                        <h4>Functional Insight</h4>
-                        <p>{activeStory.insight}</p>
-                    </div>
-                )}
-
-                <div className="screen-container">
-                    {renderScreen()}
+                <div className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                    {theme === 'dark' ? '☀' : '☾'}
                 </div>
+            </header>
+
+            {/* Main Content Area */}
+            <main className="operational-content" style={{ flex: 1, padding: '2rem', overflowY: 'auto', background: 'var(--bg-main)' }}>
+                {currentPhase === 'strategize' && renderStrategize()}
+                {currentPhase === 'monitor' && renderMonitor()}
+                {currentPhase === 'prevention' && renderPrevention()}
+                {currentPhase === 'response' && renderResponse()}
             </main>
+
+            {/* Global Accent Control (Fixed at bottom) */}
+            <div className="global-controls" style={{ padding: '0.5rem 2rem', background: 'var(--card-bg)', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <small style={{ color: 'var(--text-muted)' }}>Security Protocol HSL:</small>
+                {[
+                    { h: 225, s: '100%', l: '50%', label: 'Blue' },
+                    { h: 158, s: '80%', l: '40%', label: 'Emerald' },
+                    { h: 38, s: '90%', l: '50%', label: 'Amber' },
+                    { h: 0, s: '80%', l: '50%', label: 'Red' }
+                ].map(c => (
+                    <div key={c.h} className="accent-dot" style={{ background: `hsl(${c.h}, ${c.s}, ${c.l})` }} onClick={() => setAccent({ h: c.h, s: c.s, l: c.l })}></div>
+                ))}
+                <div style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>Powered by Crowd Twin ABM Engine v1.2</div>
+            </div>
+
+            <style>{`
+                .mission-timeline { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); }
+                .phase-nav { display: flex; gap: 3rem; }
+                .phase-item { cursor: pointer; opacity: 0.4; transition: 0.3s; }
+                .phase-item.active { opacity: 1; border-bottom: 2px solid var(--primary); }
+                .phase-item .label { font-size: 0.7rem; font-weight: 800; color: var(--primary); }
+                .phase-item .desc { font-size: 0.9rem; font-weight: 600; }
+                
+                .phase-card { background: var(--card-bg); border-radius: 24px; border: 1px solid var(--border-color); height: 100%; min-height: 500px; padding: 2rem; position: relative; overflow: hidden; }
+                .phase-card.no-padding { padding: 0; }
+                .center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+                
+                .upload-zone { border: 2px dashed var(--border-color); border-radius: 20px; padding: 4rem; cursor: pointer; transition: 0.3s; }
+                .upload-zone:hover { border-color: var(--primary); background: var(--primary-glow); }
+                
+                .map-view-container { position: relative; height: 100%; display: flex; align-items: center; }
+                .overlay-nodes .node { position: absolute; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); }
+                .floating-insights { position: absolute; bottom: 2rem; right: 2rem; width: 300px; padding: 1.5rem; border-radius: 16px; border: 1px solid var(--primary); background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+                
+                .split-view { display: grid; grid-template-columns: 1fr 400px; gap: 2rem; height: 100%; }
+                .personnel-dot { position: absolute; background: var(--amber); color: #000; font-size: 0.6rem; font-weight: 900; padding: 4px; border-radius: 4px; }
+                
+                .live-monitor-grid { display: grid; grid-template-columns: 1fr 350px; height: 100%; }
+                .video-viewport { position: relative; background: #000; }
+                .telemetry-hud { position: absolute; top: 1rem; left: 1rem; color: var(--primary); font-family: monospace; font-size: 0.8rem; letter-spacing: 2px; }
+                
+                .alerts-sidebar { padding: 1.5rem; border-left: 1px solid var(--border-color); }
+                .alert-item { background: rgba(245, 158, 11, 0.1); border: 1px solid var(--amber); padding: 1rem; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+                .alert-item:hover { transform: scale(1.02); }
+                
+                .suggestion-card { background: var(--bg-surface); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 16px; cursor: pointer; }
+                .suggestion-card.active { border-color: var(--primary); background: var(--primary-glow); }
+                
+                .command-directive { margin-top: 2rem; padding: 1.5rem; border: 1px solid var(--primary); border-radius: 16px; background: rgba(71, 117, 255, 0.05); }
+                .code-font { font-family: 'Courier New', monospace; background: #000; padding: 0.5rem; border-radius: 4px; color: var(--green); margin: 0.5rem 0; }
+                
+                .sim-loading { width: 400px; }
+                .spinner { width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: rotate 1s linear infinite; margin: 0 auto 1.5rem; }
+                @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                
+                .progress-bar { height: 8px; background: var(--border-color); border-radius: 4px; margin: 1rem 0; overflow: hidden; }
+                .progress-bar .fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+                
+                .big-check { font-size: 4rem; color: var(--green); margin-bottom: 1rem; }
+                .pro-btn { padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+                .pro-btn.primary { background: var(--primary); color: #fff; }
+                .pro-btn.secondary { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); }
+                .pro-btn.success { background: var(--green); color: #fff; }
+                
+                .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
+                .animate-in { animation: slideIn 0.4s ease-out; }
+                @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
         </div>
     )
 }
