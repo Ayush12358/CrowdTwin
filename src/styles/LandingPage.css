@@ -149,10 +149,46 @@
     transform: translateX(5px);
 }
 
-/* Hero Visual Mockup */
 .hero-visual {
     flex: 1;
     perspective: 1000px;
+}
+
+.hero-videos {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transform: rotateY(-5deg) rotateX(2deg);
+}
+
+.hero-video-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.4);
+}
+
+.hero-vid {
+    width: 100%;
+    display: block;
+    border-radius: 12px;
+}
+
+.hero-video-label {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    z-index: 2;
 }
 
 /* Pro SaaS Mockup (Code-based) */

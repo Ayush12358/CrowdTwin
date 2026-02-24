@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './styles/LandingPage.css'
 
@@ -6,27 +7,34 @@ const founders = [
         name: 'Ayush Maurya',
         role: 'Systems & Intelligence Lead',
         avatar: '/ayush.png',
-        website: 'https://ayushmaurya.dev',
+        website: 'https://github.com/Ayush12358',
         accent: 'blue',
     },
     {
         name: 'Jayanth Raju Saraswathi',
         role: 'Simulation & Modelling Lead',
         avatar: '/jayanth.png',
-        website: 'https://jayanth.dev',
+        website: 'https://github.com/TOMATOsJr',
         accent: 'purple',
     },
     {
         name: 'Prabhav',
         role: 'Product & Research Lead',
         avatar: '/prabhav.png',
-        website: 'https://prabhav.dev',
+        website: 'https://github.com/Prabhav-sai',
         accent: 'teal',
     },
 ]
 
 function LandingPage() {
     const navigate = useNavigate()
+    const heroVideos = [
+        { src: '/assets/Pre Heatmap.mp4', label: 'Live Monitoring' },
+        { src: '/assets/Post Heatmap.mp4', label: 'Post Intervention' },
+    ]
+    const [videoIdx, setVideoIdx] = useState(0)
+    const videoRefs = useRef<HTMLVideoElement[]>([])
+    useEffect(() => { videoRefs.current[0]?.play() }, [])
 
     return (
         <div className="landing-container">
@@ -60,22 +68,31 @@ function LandingPage() {
                     </div>
 
                     <div className="hero-visual">
-                        <div className="mockup-window pro-saas">
-                            <div className="header-strip">
-                                <div className="dots"><span /><span /><span /></div>
-                                <div className="address">app.crowdtwin.com/monitor</div>
-                            </div>
-                            <div className="mockup-body-saas">
-                                <div className="saas-header-mock">
-                                    <div className="m-bar" />
-                                    <div className="m-search" />
-                                </div>
-                                <div className="saas-stats-mock">
-                                    <div className="m-card" /><div className="m-card" /><div className="m-card" />
-                                </div>
-                                <div className="saas-chart-mock">
-                                    <div className="m-line" />
-                                </div>
+                        <div className="hero-videos" style={{ position: 'relative' }}>
+                            <div className="hero-video-item">
+                                <span className="hero-video-label">{heroVideos[videoIdx].label}</span>
+                                {heroVideos.map((v, i) => (
+                                    <video
+                                        key={v.src}
+                                        ref={el => { if (el) videoRefs.current[i] = el }}
+                                        src={v.src}
+                                        muted
+                                        playsInline
+                                        preload="auto"
+                                        className="hero-vid"
+                                        style={{
+                                            position: i === 0 ? 'relative' : 'absolute',
+                                            top: 0, left: 0,
+                                            opacity: videoIdx === i ? 1 : 0,
+                                            transition: 'opacity 0.5s',
+                                        }}
+                                        onEnded={() => {
+                                            const next = (i + 1) % heroVideos.length
+                                            setVideoIdx(next)
+                                            videoRefs.current[next]?.play()
+                                        }}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </div>
