@@ -7,7 +7,7 @@ import { ThemeProvider } from './ThemeContext'
 function App() {
     return (
         <ThemeProvider>
-            <Router>
+            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/demo" element={<DemoDashboard />} />
