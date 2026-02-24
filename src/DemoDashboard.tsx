@@ -47,7 +47,6 @@ const DemoDashboard: React.FC = () => {
     // TTS state (declared early because progress bar effects depend on it)
     const [ttsEnabled, setTtsEnabled] = useState(true)
     const [ttsLoading, setTtsLoading] = useState(false)
-    const prevMessageRef = React.useRef('')
     const audioRef = React.useRef<HTMLAudioElement | null>(null)
     const abortRef = React.useRef<AbortController | null>(null)
 
@@ -359,8 +358,7 @@ const DemoDashboard: React.FC = () => {
 
     // Speak when narrator message changes
     useEffect(() => {
-        if (!ttsEnabled || !narrator?.message || narrator.message === prevMessageRef.current) return
-        prevMessageRef.current = narrator.message
+        if (!ttsEnabled || !narrator?.message) return
         speakMessage(narrator.message, narrator.name.toLowerCase())
     }, [narrator?.message, narrator?.name, ttsEnabled, speakMessage])
 
