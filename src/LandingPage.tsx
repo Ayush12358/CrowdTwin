@@ -70,7 +70,7 @@ function LandingPage() {
                     <div className="hero-visual">
                         <div className="hero-videos" style={{ position: 'relative' }}>
                             <div className="hero-video-item">
-                                <span className="hero-video-label">{heroVideos[videoIdx].label}</span>
+                                <span className="hero-video-label">{heroVideos[videoIdx]!.label}</span>
                                 {heroVideos.map((v, i) => (
                                     <video
                                         key={v.src}
