@@ -267,8 +267,19 @@ const DemoDashboard: React.FC = () => {
         }
     }
 
+    // --- Story Progress ---
+    const stories = [
+        { label: 'Before the Event', done: twinPhase === 'live' || activeTab === 'predictions', active: activeTab === 'twin' },
+        { label: 'A Predicted Incident', done: didAvertOnce, active: activeTab === 'predictions' && !didAvertOnce },
+        { label: 'A Disaster Happened', done: didHandleOnce, active: activeTab === 'predictions' && didAvertOnce && !didHandleOnce },
+    ]
+
+    const allDone = stories.every(s => s.done)
+    const showDemoComplete = allDone && !(activeTab === 'predictions' && predPhase === 'resolved')
+
     // --- Narrator System ---
     const getNarratorDialogue = (): { label: string; message: string; avatar: string; name: string } => {
+        if (showDemoComplete) return { label: '', message: '', avatar: '', name: '' }
         if (activeTab === 'twin') {
             // Ayush narrates the pre-event setup story
             switch (twinPhase) {
@@ -330,8 +341,8 @@ const DemoDashboard: React.FC = () => {
             audio.ontimeupdate = () => {
                 if (audio.duration > 0) {
                     const pct = Math.min(Math.floor((audio.currentTime / audio.duration) * 100), 99)
-                    setTwinProgress(prev => twinPhase === 'verifying_nodes' ? pct : prev)
-                    setSimProgress(prev => predPhase === 'solution_finding' ? pct : prev)
+                    setTwinProgress(prev => (twinPhase === 'verifying_nodes' && prev < 100) ? pct : prev)
+                    setSimProgress(prev => (predPhase === 'solution_finding' && prev < 100) ? pct : prev)
                 }
             }
 
@@ -358,9 +369,14 @@ const DemoDashboard: React.FC = () => {
 
     // Speak when narrator message changes
     useEffect(() => {
+        if (showDemoComplete) {
+            if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
+            if (abortRef.current) { abortRef.current.abort(); abortRef.current = null }
+            return
+        }
         if (!ttsEnabled || !narrator?.message) return
         speakMessage(narrator.message, narrator.name.toLowerCase())
-    }, [narrator?.message, narrator?.name, ttsEnabled, speakMessage])
+    }, [narrator?.message, narrator?.name, ttsEnabled, speakMessage, showDemoComplete])
 
     // Cleanup on unmount
     useEffect(() => {
@@ -411,19 +427,11 @@ const DemoDashboard: React.FC = () => {
         return () => { clearTimeout(timer); cancelAnimationFrame(raf) }
     }, [targetId])
 
-    // --- Story Progress ---
-    const stories = [
-        { label: 'Before the Event', done: twinPhase === 'live' || activeTab === 'predictions', active: activeTab === 'twin' },
-        { label: 'A Predicted Incident', done: didAvertOnce, active: activeTab === 'predictions' && !didAvertOnce },
-        { label: 'A Disaster Happened', done: didHandleOnce, active: activeTab === 'predictions' && didAvertOnce && !didHandleOnce },
-    ]
-    const allDone = stories.every(s => s.done)
-
     // --- Main Render ---
 
     const nodesToShow = activeTab === 'twin' ? currentNodes : predictedNodes
 
-    if (allDone) {
+    if (showDemoComplete) {
         return (
             <div className={`app-container ${theme}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-main)' }}>
                 <div className="fade-in" style={{ textAlign: 'center', padding: '3rem 4rem', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', maxWidth: '560px', width: '100%' }}>
@@ -445,7 +453,6 @@ const DemoDashboard: React.FC = () => {
                         setActiveTab('twin'); setTwinPhase('upload'); setTwinProgress(0);
                         setPredPhase('live'); setSimProgress(0);
                         setDidAvertOnce(false); setDidHandleOnce(false);
-                        prevMessageRef.current = '';
                     }}>Restart Demo</button>
                 </div>
             </div>
