@@ -14,7 +14,7 @@ style: |
 # Crowd-Twin: A Predictive Layer for Security Command Centers
 
 
-**AJP Innovators**
+**APJ Innovators**
 
 ![bg right:65% fit](heatmap_v2.png)
 
@@ -68,7 +68,7 @@ We don't replace your cameras; we make them proactive. Our system uses a Psychol
 
 ---
 
-# We are AJP Innovators, seeking partners to pilot this capability.
+# We are APJ Innovators, seeking partners to pilot this capability.
 
 In India, event organizers are legally required to hire **PSARA-certified security firms**. We are seeking to pilot our predictive engine with these specialized teams.
 

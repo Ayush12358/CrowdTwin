@@ -5,7 +5,7 @@
 *   **Sub-Headline:** Operational Predictive Command for High-Density Venues.
 *   **Visual:** High-contrast image of a command center screen showing a heat map with a "Predicted Risk" alert.
 *   **Speaker Notes:**
-    *   "Good morning. We are AJP Innovators, and we are here to talk about the 15-minute gap between a safe event and a deadly stampede."
+    *   "Good morning. We are APJ Innovators, and we are here to talk about the 15-minute gap between a safe event and a deadly stampede."
     *   "We present Crowd-Twin: The operational intelligence layer that turns your security team from reactive responders into proactive guardians."
 
 ---

@@ -37,141 +37,173 @@ function LandingPage() {
     useEffect(() => { videoRefs.current[0]?.play() }, [])
 
     return (
-        <div className="landing-container">
+        <div className="landing-container dashboard-layout">
             <header className="landing-nav">
-                <div className="landing-logo">CROWD-TWIN</div>
-                <nav className="nav-links">
-                    <a href="#solution">Solution</a>
-                    <a href="#tech">Technology</a>
-                    <a href="#team">Team</a>
-                </nav>
-                <button className="nav-cta" onClick={() => navigate('/demo')}>Live Demo</button>
+                <div className="nav-left">
+                    <div className="landing-brand">
+                        <img src="/assets/logo_no_bg.png" alt="CrowdTwin Logo Element" className="landing-logo-img" />
+                        <div className="landing-logo-text">CROWD-TWIN</div>
+                    </div>
+                </div>
+
+                <div className="nav-right">
+                    <div className="header-team">
+                        {founders.map((f) => (
+                            <img key={f.name} src={f.avatar} alt={f.name} className="header-avatar" title={`${f.name} - ${f.role}`} />
+                        ))}
+                    </div>
+                    <button className="nav-cta" onClick={() => navigate('/demo')}>Live Demo</button>
+                </div>
             </header>
 
-            <main>
-                {/* ---- HERO ---- */}
-                <section className="hero">
-                    <div className="hero-content">
-                        <div className="badge">For PSARA-Certified Security Firms</div>
-                        <h1>Predictive Command Center for Venue Security</h1>
-                        <p className="hero-subtext">
-                            Move from reactive monitoring to proactive control.
-                            We provide a <strong>15-minute lead time</strong> to redirect
-                            crowd flow before critical surges occur — no new hardware required.
-                        </p>
-                        <div className="cta-group">
-                            <button className="primary-cta" onClick={() => navigate('/demo')}>
-                                Launch Live Demo <span className="arrow">&#8594;</span>
-                            </button>
-                            <button className="secondary-cta">Contact Us</button>
+            <main className="dashboard-grid">
+                {/* ---- HERO (Top Left) ---- */}
+                <section className="dashboard-hero illustrative-hero">
+                    <div className="hero-label">MISSION-CRITICAL CROWD INTELLIGENCE</div>
+                    <h1 className="hero-title">
+                        Avert Disaster Before<br />
+                        <span className="text-gradient">It Threatens Lives</span>
+                    </h1>
+                    <p className="hero-description">
+                        Our company is CrowdTwin,
+                        we are developing a Predictive Command Center
+                        to help Certified Venue Security Firms
+                        with managing ground force and mitigate crowd risks.
+                        To do this we use a digital twin and simulations through Agent Based Modeling.
+                    </p>
+
+                    <div className="hero-features">
+                        <div className="feature-pill blue-pill">
+                            <span className="pill-dot"></span>
+                            <span>Digital Twin Engine</span>
+                        </div>
+                        <div className="feature-pill purple-pill">
+                            <span className="pill-dot"></span>
+                            <span>Agent Based Modeling</span>
+                        </div>
+                        <div className="feature-pill green-pill">
+                            <span className="pill-dot"></span>
+                            <span>PSARA-Certified Ready</span>
                         </div>
                     </div>
+                </section>
 
-                    <div className="hero-visual">
-                        <div className="hero-videos" style={{ position: 'relative' }}>
-                            <div className="hero-video-item">
-                                <span className="hero-video-label">{heroVideos[videoIdx]!.label}</span>
-                                {heroVideos.map((v, i) => (
-                                    <video
-                                        key={v.src}
-                                        ref={el => { if (el) videoRefs.current[i] = el }}
-                                        src={v.src}
-                                        muted
-                                        playsInline
-                                        preload="auto"
-                                        className="hero-vid"
-                                        style={{
-                                            position: i === 0 ? 'relative' : 'absolute',
-                                            top: 0, left: 0,
-                                            opacity: videoIdx === i ? 1 : 0,
-                                            transition: 'opacity 0.5s',
-                                        }}
-                                        onEnded={() => {
-                                            const next = (i + 1) % heroVideos.length
-                                            setVideoIdx(next)
-                                            videoRefs.current[next]?.play()
-                                        }}
-                                    />
-                                ))}
+                {/* ---- COMMAND WIDGET (Top Right) ---- */}
+                <section className="dashboard-hero-graphic">
+                    <div className="hero-graphic-orb"></div>
+
+                    <div className="hero-command-widget">
+                        {/* Left Column: Directives + Image */}
+                        <div className="directives-panel">
+                            <div className="directive-header">
+                                <h3>Actionable steps</h3>
+                                <div className="pulsing-alert-indicator"></div>
+                            </div>
+
+                            <div className="directives-row">
+                                <div className="directive-group">
+                                    <h4>Ground Force Directive:</h4>
+                                    <ul>
+                                        <li>Evac from gate c</li>
+                                        <li>Divert crowd from ground a west side</li>
+                                    </ul>
+                                </div>
+                                <div className="directive-group rec-group">
+                                    <h4>Recommendations:</h4>
+                                    <ul>
+                                        <li>Open Emergency gate 5</li>
+                                        <li>Divert West plaza</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="widget-topology-container">
+                                <img src="/assets/sample.png" alt="Digital Twin Topology" className="widget-topology-img" />
                             </div>
                         </div>
+
+                        {/* Right Column: Gates Panel */}
+                        <div className="gates-panel">
+                            <div className="panel-header">
+                                <h3>Active Gates</h3>
+                            </div>
+                            <div className="gates-table-header">
+                                <span>Name</span>
+                                <span>Status</span>
+                            </div>
+                            <div className="gates-list">
+                                <div className="gate-item">
+                                    <div className="gate-info">
+                                        <strong>Gate A</strong>
+                                        <span>Main Entrance</span>
+                                    </div>
+                                    <div className="gate-status st-open">
+                                        <div className="status-dot"></div> Open
+                                    </div>
+                                    <div className="gate-toggle active"></div>
+                                </div>
+                                <div className="gate-item">
+                                    <div className="gate-info">
+                                        <strong>Gate B</strong>
+                                        <span>North Wing</span>
+                                    </div>
+                                    <div className="gate-status st-closed">
+                                        <div className="status-dot"></div> Closed
+                                    </div>
+                                    <div className="gate-toggle"></div>
+                                </div>
+                                <div className="gate-item highlighted-gate">
+                                    <div className="gate-info">
+                                        <strong>Gate C</strong>
+                                        <span>East Plaza</span>
+                                    </div>
+                                    <div className="gate-status st-warning">
+                                        <div className="status-dot"></div> Overcrowded
+                                    </div>
+                                    <div className="gate-toggle active"></div>
+                                </div>
+                                <div className="gate-item">
+                                    <div className="gate-info">
+                                        <strong>Gate D</strong>
+                                        <span>VIP Access</span>
+                                    </div>
+                                    <div className="gate-status st-open">
+                                        <div className="status-dot"></div> Open
+                                    </div>
+                                    <div className="gate-toggle active"></div>
+                                </div>
+                            </div>
+                            <button className="view-all-btn">View All Gates</button>
+                        </div>
                     </div>
                 </section>
 
-                {/* ---- STATS ---- */}
-                <section className="stats-strip">
-                    <div className="stat-item">
-                        <span className="stat-num">15<small>min</small></span>
-                        <span className="stat-label">Predictive Lead Time</span>
-                    </div>
-                    <div className="stat-divider" />
-                    <div className="stat-item">
-                        <span className="stat-num">7<small>p/m²</small></span>
-                        <span className="stat-label">Critical Density Threshold</span>
-                    </div>
-                    <div className="stat-divider" />
-                    <div className="stat-item">
-                        <span className="stat-num">0</span>
-                        <span className="stat-label">Extra Hardware Needed</span>
-                    </div>
-                    <div className="stat-divider" />
-                    <div className="stat-item">
-                        <span className="stat-num">10</span>
-                        <span className="stat-label">Command Screens</span>
-                    </div>
-                </section>
-
-                {/* ---- VALUE PROPS ---- */}
-                <section id="solution" className="features">
-                    <div className="section-header">
-                        <span className="section-tag">The Problem We Solve</span>
-                        <h2>From Reactive CCTV to Predictive Control</h2>
-                    </div>
-                    <div className="feature-grid">
-                        <div className="feature-card">
-                            <div className="icon">&#128065;&#65039;</div>
-                            <h3>The 7 p/m² Problem</h3>
-                            <p>At 7 people per square meter, crowds behave like a fluid. Physical intervention becomes impossible, and conventional CCTV only alerts you after the threshold is already breached.</p>
-                        </div>
-                        <div className="feature-card highlighted">
-                            <div className="icon">&#9201;&#65039;</div>
-                            <h3>Our Solution: 15-Min Lead Time</h3>
-                            <p>We analyze existing CCTV feeds to <strong>forecast critical density 15 minutes into the future</strong>, allowing security teams to close gates or redirect flow before surges form.</p>
-                        </div>
-                        <div className="feature-card">
-                            <div className="icon">&#129504;</div>
-                            <h3>Psychological ABM</h3>
-                            <p>Unlike standard fluid dynamics models, our Agent-Based Model simulates individual "virtual brains" with psychological stress responses — modeling actual human behavior.</p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ---- HOW IT WORKS ---- */}
-                <section id="tech" className="how-it-works">
-                    <div className="section-header">
-                        <span className="section-tag">Technology</span>
+                {/* ---- HOW IT WORKS (Bottom Left) ---- */}
+                <section className="dashboard-tech">
+                    <div className="tech-header">
+                        {/* <span className="section-tag">Technology</span> */}
                         <h2>How CrowdTwin Works</h2>
                     </div>
-                    <div className="steps-grid">
-                        <div className="step-card">
+                    <div className="compact-steps-grid">
+                        <div className="compact-step-card">
                             <div className="step-num">01</div>
                             <h4>Ingest</h4>
                             <p>Reads existing CCTV sensor data — no new hardware installation required.</p>
                         </div>
-                        <div className="step-connector" />
-                        <div className="step-card">
+                        <div className="step-arrow">&#10132;</div>
+                        <div className="compact-step-card">
                             <div className="step-num">02</div>
                             <h4>Simulate</h4>
                             <p>Runs a Digital Twin agent-based simulation with psychological crowd behavior models.</p>
                         </div>
-                        <div className="step-connector" />
-                        <div className="step-card">
+                        <div className="step-arrow">&#10132;</div>
+                        <div className="compact-step-card">
                             <div className="step-num">03</div>
                             <h4>Forecast</h4>
                             <p>Generates a 15-minute density forecast with bottleneck and surge identification.</p>
                         </div>
-                        <div className="step-connector" />
-                        <div className="step-card">
+                        <div className="step-arrow">&#10132;</div>
+                        <div className="compact-step-card">
                             <div className="step-num">04</div>
                             <h4>Command</h4>
                             <p>Pushes actionable directives to security staff terminals before the situation escalates.</p>
@@ -179,69 +211,16 @@ function LandingPage() {
                     </div>
                 </section>
 
-                {/* ---- COGNITIVE ENGINE ---- */}
-                <section id="tech-deep" className="tech-showcase">
-                    <div className="showcase-content">
-                        <div className="showcase-text">
-                            <span className="section-tag">Inside the Engine</span>
-                            <h2>The Cognitive ABM Framework</h2>
-                            <p>
-                                Unlike traditional architectural tracers, CrowdTwin models the <strong>individual psychological response</strong> of every person in the venue.
-                            </p>
-                            <ul className="engine-checklist">
-                                <li><strong>Vision Sensors:</strong> Virtual agents "see" density shifts.</li>
-                                <li><strong>Goal Hierarchy:</strong> Agents prioritize safety over path efficiency.</li>
-                                <li><strong>Stress Vectors:</strong> Modeling velocity drop-off under social pressure.</li>
-                            </ul>
-                        </div>
-                        <div className="showcase-visual">
-                            <div className="engine-viz-box">
-                                <div className="viz-layer l1"><span>Virtual Brain</span></div>
-                                <div className="viz-layer l2"><span>Goal Hierarchy</span></div>
-                                <div className="viz-layer l3"><span>Stress Response</span></div>
-                                <div className="viz-particles">
-                                    {[...Array(20)].map((_, i) => <div key={i} className="particle" />)}
-                                </div>
-                            </div>
-                            <div className="diagram-glow" />
-                        </div>
-                    </div>
-                </section>
-
-                {/* ---- FOUNDERS ---- */}
-                <section id="team" className="team">
-                    <div className="section-header">
-                        <span className="section-tag">The Team</span>
-                        <h2>Built by AJP Innovators</h2>
-                        <p className="section-sub">Three engineers obsessed with making large events safer.</p>
-                    </div>
-                    <div className="founders-grid">
-                        {founders.map((f) => (
-                            <div className={`founder-card founder-card--${f.accent}`} key={f.name}>
-                                <div className="founder-avatar-wrap">
-                                    <img src={f.avatar} alt={f.name} className="founder-avatar" />
-                                </div>
-                                <h3 className="founder-name">{f.name}</h3>
-                                <p className="founder-role">{f.role}</p>
-                                <a
-                                    href={f.website}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="founder-link"
-                                >
-                                    Portfolio &#8594;
-                                </a>
-                            </div>
-                        ))}
+                {/* ---- SCOPE OF LIABILITY (Bottom Right) ---- */}
+                <section className="dashboard-liability-mini">
+                    <div className="liability-mini-title">Scale of Averted Liability</div>
+                    <div className="liability-mini-list">
+                        <div className="l-mini-item"><strong>Astroworld:</strong> 4,000+ consolidated civil cases; $2B damages sought; 10 wrongful deaths settled.</div>
+                        <div className="l-mini-item"><strong>Maha Kumbh:</strong> 82+ deaths; High Court ordered ₹25L per-family relief due to payout delays.</div>
+                        <div className="l-mini-item"><strong>Cuscatlán:</strong> 5 Stadium Execs arrested; Forced financial restitution to victims & survivors.</div>
                     </div>
                 </section>
             </main>
-
-            <footer className="landing-footer">
-                <p className="footer-logo">CROWD-TWIN</p>
-                <p>&copy; 2026 AJP Innovators. All rights reserved.</p>
-                <button className="footer-demo-btn" onClick={() => navigate('/demo')}>Open Demo &#8594;</button>
-            </footer>
         </div>
     )
 }
