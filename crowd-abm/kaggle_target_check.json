@@ -1,0 +1,24 @@
+{
+  "rows": 400,
+  "cols": 400,
+  "agents": 100000,
+  "requested_steps": 60,
+  "executed_steps": 60,
+  "early_converged": false,
+  "elapsed_sec": 1.2112806049990468,
+  "steps_per_sec": 49.534352116574354,
+  "meets_minute_in_second": false,
+  "usage": {
+    "samples": 0,
+    "avg_cpu_percent": null,
+    "max_cpu_percent": null,
+    "avg_process_cpu_percent": null,
+    "max_process_cpu_percent": null,
+    "max_process_rss_mb": null,
+    "avg_gpu_util_percent": null,
+    "max_gpu_util_percent": null,
+    "avg_gpu_mem_util_percent": null,
+    "max_gpu_mem_util_percent": null,
+    "max_gpu_mem_used_mb": null
+  }
+}
