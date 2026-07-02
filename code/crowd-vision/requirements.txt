@@ -1,0 +1,6 @@
+supervision>=0.20.0
+ultralytics
+fastapi
+uvicorn
+opencv-python-headless
+numpy

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  vision-service:
+    build:
+      context: ./crowd-vision
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Example to map a video file into the container if not using a webcam/RTSP stream:
+    # volumes:
+    #   - ./input.mp4:/app/input.mp4
+    # command: ["--camera_link", "/app/input.mp4", "--host", "0.0.0.0", "--port", "8000"]
+
+  abm-service:
+    build:
+      context: ./crowd-abm
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - vision-service

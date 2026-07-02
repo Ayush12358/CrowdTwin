@@ -1,0 +1,42 @@
+[
+  {
+    "event_id": "evt_df011b",
+    "timestamp": "2026-07-02T19:06:29.029219Z",
+    "alert_type": "NONE",
+    "predicted_density": 0.0,
+    "directive_issued": "NONE",
+    "staff_acknowledged_time": "2026-07-02T19:06:29.029240Z",
+    "action_completed_time": "2026-07-02T19:06:29.029247Z",
+    "verification_outcome": "SUCCESS"
+  },
+  {
+    "event_id": "evt_2a7d84",
+    "timestamp": "2026-07-02T19:09:36.825991Z",
+    "alert_type": "NONE",
+    "predicted_density": 0.0,
+    "directive_issued": "NONE",
+    "staff_acknowledged_time": "2026-07-02T19:09:36.826030Z",
+    "action_completed_time": "2026-07-02T19:09:36.826038Z",
+    "verification_outcome": "SUCCESS"
+  },
+  {
+    "event_id": "evt_7cd2e2",
+    "timestamp": "2026-07-02T19:11:55.117198+00:00",
+    "alert_type": "NONE",
+    "predicted_density": 0.0,
+    "directive_issued": "NONE",
+    "staff_acknowledged_time": "2026-07-02T19:11:55.117214+00:00",
+    "action_completed_time": "2026-07-02T19:11:55.117216+00:00",
+    "verification_outcome": "SUCCESS"
+  },
+  {
+    "event_id": "evt_bd71f1",
+    "timestamp": "2026-07-02T19:15:30.291378+00:00",
+    "alert_type": "NONE",
+    "predicted_density": 0.0,
+    "directive_issued": "NONE",
+    "staff_acknowledged_time": "2026-07-02T19:15:30.291389+00:00",
+    "action_completed_time": "2026-07-02T19:15:30.291391+00:00",
+    "verification_outcome": "SUCCESS"
+  }
+]

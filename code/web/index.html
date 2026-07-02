@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdTwin: Operational Predictive Command Center</title>
+    <!-- Tailwind CSS for modern design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+        .canvas-container {
+            position: relative;
+            background-color: #0b0f19;
+            border: 2px solid #1e293b;
+        }
+    </style>
+</head>
+<body class="gradient-bg text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl font-bold tracking-wider text-indigo-400">CROWD-TWIN</span>
+            <span class="text-xs uppercase bg-indigo-950 text-indigo-300 px-2.5 py-1 rounded font-semibold border border-indigo-800">Command Center</span>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div id="system-status" class="flex items-center space-x-2">
+                <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span class="text-sm font-medium text-emerald-400">System Live</span>
+            </div>
+            <div class="text-sm text-slate-400" id="time-display">00:00:00</div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+
+        <!-- Left Panel: Control & Analytics -->
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            
+            <!-- Target APIs & Connection Config -->
+            <section class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 shadow-lg">
+                <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                    <span>🔌</span> API Connection
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Vision API Endpoint</label>
+                        <input id="vision-endpoint" type="text" value="http://localhost:8000" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">ABM API Endpoint</label>
+                        <input id="abm-endpoint" type="text" value="http://localhost:8001" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div class="flex items-center">
+                        <input id="use-numpy-test" type="checkbox" checked class="rounded border-slate-800 bg-slate-950 text-indigo-600 focus:ring-indigo-500 h-4 w-4" />
+                        <label for="use-numpy-test" class="ml-2 text-sm text-slate-300">Use CPU NumPy Reference Backend</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Simulation Controls -->
+            <section class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 shadow-lg flex-1">
+                <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                    <span>⚙️</span> Simulation Settings
+                </h2>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Forecast Range</label>
+                        <div class="flex items-center justify-between text-sm text-slate-300 mb-2">
+                            <span>1 Step</span>
+                            <span class="text-indigo-400 font-bold" id="forecast-label">15 Mins</span>
+                        </div>
+                        <input id="forecast-steps" type="range" min="1" max="15" value="5" class="w-full accent-indigo-500 bg-slate-950 rounded-lg appearance-none h-2" />
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800">
+                        <button id="btn-trigger-forecast" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded transition">
+                            Run Step Simulation
+                        </button>
+                    </div>
+
+                    <!-- Recommended Directives -->
+                    <div class="pt-4 border-t border-slate-800">
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Directives Command Panel</label>
+                        <div class="space-y-2">
+                            <button id="btn-directive-gate" class="w-full text-left bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded p-3 text-sm flex justify-between items-center transition">
+                                <div>
+                                    <div class="font-semibold text-slate-200">Divert Crowd: Close Gate 4</div>
+                                    <div class="text-xs text-slate-400">Restricts movement along X=40</div>
+                                </div>
+                                <span id="directive-gate-status" class="text-xs font-semibold text-slate-500 bg-slate-900 px-2 py-0.5 rounded">Active</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Proximity Graph Clustering -->
+                    <div class="pt-4 border-t border-slate-800">
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Proximity Analytics</label>
+                        <div class="grid grid-cols-2 gap-2 bg-slate-950 border border-slate-800 rounded p-3 text-xs">
+                            <div>
+                                <div class="text-[10px] uppercase text-slate-500">Average Degree</div>
+                                <div class="text-sm font-bold text-indigo-400 mt-0.5" id="val-avg-degree">0.0</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] uppercase text-slate-500">Congestion Level</div>
+                                <div class="text-sm font-bold mt-0.5 text-emerald-400" id="val-congestion-lvl">FREE-FLOW</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compliance Export -->
+                    <div class="pt-4 border-t border-slate-800">
+                        <button id="btn-export-audit" class="w-full bg-slate-950 hover:bg-slate-900 border border-indigo-900 text-indigo-400 font-semibold py-2 px-4 rounded text-sm transition">
+                            📥 Export Compliance Audit Log
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Center Canvas: Heatmap and Trajectories -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            
+            <!-- Density Warning Banner -->
+            <div id="density-alert-banner" class="hidden bg-red-950 border border-red-800 text-red-200 px-4 py-3 rounded-xl flex items-center justify-between animate-pulse">
+                <div class="flex items-center space-x-3">
+                    <span class="text-lg">⚠️</span>
+                    <div>
+                        <div class="font-bold text-sm">Critical Surge Warning</div>
+                        <div class="text-xs text-red-300">Local density predicted to exceed safety thresholds in 15 mins.</div>
+                    </div>
+                </div>
+                <div class="text-xs font-mono bg-red-900 px-2 py-1 rounded" id="alert-density-val">7.2 p/m²</div>
+            </div>
+
+            <!-- Operational Canvas Visualizer -->
+            <div class="canvas-container rounded-xl flex-1 flex flex-col p-4 shadow-lg min-h-[500px]">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm uppercase tracking-widest text-indigo-400 font-semibold">Live Simulation Layer</h3>
+                    <span class="text-xs text-slate-400" id="agent-count-badge">Agents: 0</span>
+                </div>
+                <div class="flex-1 flex items-center justify-center relative">
+                    <canvas id="twin-canvas" width="600" height="600" class="max-w-full max-h-full border border-slate-800 rounded"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Panel: Diagnostics & Analytics -->
+        <div class="lg:col-span-1 flex flex-col gap-6">
+
+            <!-- Real-time Ingestion Feed -->
+            <section class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 shadow-lg flex-1 flex flex-col">
+                <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                    <span>📡</span> Live Tracking Ingest
+                </h2>
+                <div class="flex-1 overflow-y-auto space-y-3 font-mono text-xs max-h-[300px] border border-slate-800 rounded p-3 bg-slate-950" id="ingest-feed">
+                    <div class="text-slate-500">Awaiting stream ingestion...</div>
+                </div>
+            </section>
+
+            <!-- Safety KPIs -->
+            <section class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 shadow-lg">
+                <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                    <span>🛡️</span> Safety Analytics
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-950 border border-slate-800 rounded p-3 text-center">
+                        <div class="text-2xl font-bold text-indigo-400" id="kpi-score">92%</div>
+                        <div class="text-[10px] uppercase text-slate-400 mt-1">Safety Rating</div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded p-3 text-center">
+                        <div class="text-2xl font-bold text-emerald-400" id="kpi-prevented">4</div>
+                        <div class="text-[10px] uppercase text-slate-400 mt-1">Surges Avoided</div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded p-3 text-center col-span-2">
+                        <div class="text-sm font-bold text-slate-200" id="kpi-time">2.4 mins</div>
+                        <div class="text-[10px] uppercase text-slate-400 mt-1">Avg Response Dispatch</div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Status Bar -->
+    <footer class="border-t border-slate-800 bg-slate-900/40 px-6 py-3 flex justify-between items-center text-xs text-slate-500">
+        <div>Predictive Command Center V2 (Greenfield Refactored)</div>
+        <div>Active Backend: pyflamegpu / numpy fallback</div>
+    </footer>
+
+    <!-- Interactive script wiring the APIs -->
+    <script>
+        // DOM Elements
+        const twinCanvas = document.getElementById('twin-canvas');
+        const ctx = twinCanvas.getContext('2d');
+        const visionEndpoint = document.getElementById('vision-endpoint');
+        const abmEndpoint = document.getElementById('abm-endpoint');
+        const useNumpyTest = document.getElementById('use-numpy-test');
+        const forecastSteps = document.getElementById('forecast-steps');
+        const forecastLabel = document.getElementById('forecast-label');
+        const btnTriggerForecast = document.getElementById('btn-trigger-forecast');
+        const btnDirectiveGate = document.getElementById('btn-directive-gate');
+        const directiveGateStatus = document.getElementById('directive-gate-status');
+        const densityAlertBanner = document.getElementById('density-alert-banner');
+        const alertDensityVal = document.getElementById('alert-density-val');
+        const agentCountBadge = document.getElementById('agent-count-badge');
+        const timeDisplay = document.getElementById('time-display');
+        const ingestFeed = document.getElementById('ingest-feed');
+        const kpiPrevented = document.getElementById('kpi-prevented');
+        const btnExportAudit = document.getElementById('btn-export-audit');
+
+        // State variables
+        let agents = [];
+        let simulationObstacles = [];
+        let bounds = [100, 100];
+        let alertCount = 4;
+        let scaleX = twinCanvas.width / bounds[0];
+        let scaleY = twinCanvas.height / bounds[1];
+
+        // 1. Clock timer
+        setInterval(() => {
+            timeDisplay.innerText = new Date().toLocaleTimeString();
+        }, 1000);
+
+        // 2. Setup mock data if API connection is not established
+        function loadMockDetections() {
+            agents = [
+                { id: 1, position: [30, 30], velocity: [0.5, 0.5], stress_factor: 0.1, target_id: 1 },
+                { id: 2, position: [45, 55], velocity: [-0.2, 0.4], stress_factor: 0.2, target_id: 1 },
+                { id: 3, position: [65, 45], velocity: [0.1, -0.6], stress_factor: 0.05, target_id: 1 },
+                { id: 4, position: [80, 20], velocity: [-0.8, -0.2], stress_factor: 0.15, target_id: 1 }
+            ];
+            drawtwin();
+        }
+
+        // 3. Render functions
+        function drawtwin() {
+            ctx.clearRect(0, 0, twinCanvas.width, twinCanvas.height);
+
+            // Draw Grid Lines
+            ctx.strokeStyle = '#111827';
+            ctx.lineWidth = 1;
+            const gridCells = 10;
+            for(let i=1; i<gridCells; i++) {
+                // Vertical
+                ctx.beginPath();
+                ctx.moveTo(i * (twinCanvas.width / gridCells), 0);
+                ctx.lineTo(i * (twinCanvas.width / gridCells), twinCanvas.height);
+                ctx.stroke();
+
+                // Horizontal
+                ctx.beginPath();
+                ctx.moveTo(0, i * (twinCanvas.height / gridCells));
+                ctx.lineTo(twinCanvas.width, i * (twinCanvas.height / gridCells));
+                ctx.stroke();
+            }
+
+            // Draw Obstacles
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            simulationObstacles.forEach(obs => {
+                const x = obs[0] * scaleX;
+                const y = obs[1] * scaleY;
+                const w = (obs[2] - obs[0]) * scaleX;
+                const h = (obs[3] - obs[1]) * scaleY;
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeRect(x, y, w, h);
+            });
+
+            // Draw Agents
+            agents.forEach(agent => {
+                const x = agent.position[0] * scaleX;
+                const y = agent.position[1] * scaleY;
+
+                // Color represents stress factor
+                const redIntensity = Math.floor(agent.stress_factor * 255);
+                const color = `rgb(${redIntensity}, 129, 244)`;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                ctx.fillStyle = color;
+                ctx.fill();
+
+                // Draw velocity vector line
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + (agent.velocity[0] * 12), y + (agent.velocity[1] * 12));
+                ctx.strokeStyle = '#6366f1';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // ID text overlay
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '8px monospace';
+                ctx.fillText(`ID:${agent.id}`, x + 8, y - 4);
+            });
+        }
+
+        // 4. Ingestion Feed updates
+        function logIngestEvent(msg) {
+            const entry = document.createElement('div');
+            entry.className = 'py-0.5 border-b border-slate-900 text-slate-300';
+            entry.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            ingestFeed.appendChild(entry);
+            ingestFeed.scrollTop = ingestFeed.scrollHeight;
+        }
+
+        // 5. Connect and Poll Vision Ingestion API
+        async function pollVision() {
+            try {
+                const response = await fetch(`${visionEndpoint.value}/ingest/latest`);
+                const data = await response.json();
+                if (data.ok && data.data) {
+                    const result = data.data.result;
+                    logIngestEvent(`Frame ${data.data.frame_index} ingested. Tracks: ${result.num_tracks}`);
+                    agentCountBadge.innerText = `Agents: ${result.num_tracks}`;
+                    
+                    // Map ingested tracks directly to active agents array
+                    agents = result.tracks.map(t => ({
+                        id: t.id,
+                        position: t.position,
+                        velocity: t.velocity,
+                        stress_factor: t.speed > 1.0 ? 0.3 : 0.05,
+                        target_id: 1
+                    }));
+                    drawtwin();
+                }
+            } catch (err) {
+                // Silent catch, fallback to mock if no connection is active
+            }
+        }
+        setInterval(pollVision, 1000);
+
+        // 6. Connect to ABM Simulator API and run step updates
+        async function runABMStep() {
+            logIngestEvent(`Invoking simulation step (testing=${useNumpyTest.checked})...`);
+            
+            const payload = {
+                steps: parseInt(forecastSteps.value),
+                terrain: {
+                    bounds: bounds,
+                    obstacles: simulationObstacles
+                },
+                agents: agents.map(a => ({
+                    id: a.id,
+                    position: a.position,
+                    velocity: a.velocity,
+                    stress_factor: a.stress_factor,
+                    target_id: a.target_id
+                }))
+            };
+
+            try {
+                const url = `${abmEndpoint.value}/step?testing=${useNumpyTest.checked}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                if (response.ok && data.ok) {
+                    logIngestEvent(`Simulation step completed.`);
+                    agents = data.agents;
+                    drawtwin();
+
+                    // Update Proximity Metrics UI
+                    if (data.proximity_metrics) {
+                        document.getElementById('val-avg-degree').innerText = data.proximity_metrics.average_degree;
+                        const lvl = data.proximity_metrics.congestion_level;
+                        const lvlEl = document.getElementById('val-congestion-lvl');
+                        lvlEl.innerText = lvl;
+                        if (lvl === "COMPRESSION_RISK") {
+                            lvlEl.className = "text-sm font-bold mt-0.5 text-red-500 animate-pulse";
+                        } else if (lvl === "MODERATE_FLOW") {
+                            lvlEl.className = "text-sm font-bold mt-0.5 text-amber-500";
+                        } else {
+                            lvlEl.className = "text-sm font-bold mt-0.5 text-emerald-400";
+                        }
+                    }
+
+                    // Evaluate Density events
+                    if (data.events && data.events.length > 0) {
+                        densityAlertBanner.classList.remove('hidden');
+                        alertDensityVal.innerText = `${data.events[0].density} p/m²`;
+                        logIngestEvent(`🚨 THRESHOLD_BREACH: Density ${data.events[0].density} p/m²`);
+                    } else {
+                        densityAlertBanner.classList.add('hidden');
+                    }
+                } else {
+                    const errMsg = data.detail || 'Simulation error';
+                    logIngestEvent(`❌ Fail-Fast: ${errMsg}`);
+                    alert(`Simulation Failed:\n${errMsg}`);
+                }
+            } catch (err) {
+                logIngestEvent(`❌ API Connection failed to ${abmEndpoint.value}`);
+                alert(`API Connection Failed: Unable to reach simulator service at ${abmEndpoint.value}`);
+            }
+        }
+
+        // Action Buttons Wiring
+        btnTriggerForecast.addEventListener('click', runABMStep);
+        forecastSteps.addEventListener('input', (e) => {
+            forecastLabel.innerText = `${e.target.value * 3} Mins`;
+        });
+
+        // Compliance Audit Downloader
+        btnExportAudit.addEventListener('click', async () => {
+            try {
+                logIngestEvent("Requesting compliance audit dump...");
+                const response = await fetch(`${abmEndpoint.value}/compliance/audit`);
+                const data = await response.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `compliance_audit_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                logIngestEvent("✅ Compliance audit log successfully exported.");
+            } catch (err) {
+                logIngestEvent("❌ Failed to export compliance logs.");
+                alert("Failed to export compliance logs: Unable to reach ABM endpoint.");
+            }
+        });
+
+        // Directives: Gate Toggling Obstacles
+        let gateActive = false;
+        btnDirectiveGate.addEventListener('click', () => {
+            gateActive = !gateActive;
+            if (gateActive) {
+                // Add obstacle bounds representing Gate 4 blockage
+                simulationObstacles.push([38, 0, 42, 60]);
+                directiveGateStatus.innerText = 'Active';
+                directiveGateStatus.className = 'text-xs font-semibold text-red-400 bg-red-950 px-2 py-0.5 rounded border border-red-800';
+                logIngestEvent(`Directive Activated: Gate 4 Closed.`);
+                
+                // Track metric update
+                alertCount += 1;
+                kpiPrevented.innerText = alertCount;
+            } else {
+                simulationObstacles = [];
+                directiveGateStatus.innerText = 'Standby';
+                directiveGateStatus.className = 'text-xs font-semibold text-slate-500 bg-slate-900 px-2 py-0.5 rounded';
+                logIngestEvent(`Directive Reverted: Gate 4 Opened.`);
+            }
+            drawtwin();
+        });
+
+        // Initial setup
+        loadMockDetections();
+    </script>
+</body>
+</html>

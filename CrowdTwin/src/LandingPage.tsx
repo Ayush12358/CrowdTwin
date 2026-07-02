@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import './styles/LandingPage.css'
 
 const founders = [
@@ -27,7 +26,6 @@ const founders = [
 ]
 
 function LandingPage() {
-    const navigate = useNavigate()
     const heroVideos = [
         { src: '/assets/Pre Heatmap.mp4', label: 'Live Monitoring' },
         { src: '/assets/Post Heatmap.mp4', label: 'Post Intervention' },
@@ -52,7 +50,6 @@ function LandingPage() {
                             <img key={f.name} src={f.avatar} alt={f.name} className="header-avatar" title={`${f.name} - ${f.role}`} />
                         ))}
                     </div>
-                    <button className="nav-cta" onClick={() => navigate('/demo')}>Live Demo</button>
                 </div>
             </header>
 
